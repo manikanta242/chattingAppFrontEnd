@@ -1,0 +1,26 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <a routerLink="/chat" class="back-btn">← Back to Chat</a>
+    <h2>Friend Requests</h2>
+  </div>
+
+  <p class="feedback-msg" *ngIf="message">{{ message }}</p>
+
+  <div class="requests-list">
+    <div class="request-card" *ngFor="let req of pendingRequests">
+      <div class="request-info">
+        <span class="request-from">{{ req.name }} sent you a friend request</span>
+        <span class="request-status">Status: {{ req.status }}</span>
+      </div>
+      <button (click)="acceptRequest(req)" class="btn-primary">
+        ✓ Accept
+      </button>
+    </div>
+
+    <div class="empty-state" *ngIf="pendingRequests.length === 0">
+      No pending friend requests.
+    </div>
+  </div>
+
+</div>

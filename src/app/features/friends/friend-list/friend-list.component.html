@@ -1,0 +1,36 @@
+<div class="page-container">
+  <div class="page-header">
+    <a routerLink="/chat" class="back-btn">← Back to Chat</a>
+    <h2>Find Friends</h2>
+    <a routerLink="/friends/requests" class="btn-outline"
+      >Pending Requests 🔔
+    </a>
+  </div>
+
+  <p class="feedback-msg" *ngIf="message">{{ message }}</p>
+
+  <div class="user-grid">
+    <div class="user-card" *ngFor="let user of allUsers">
+      <div class="user-avatar">{{ user.name[0] | uppercase }}</div>
+      <div class="user-info">
+        <div class="user-name">{{ user.name }}</div>
+        <div class="user-email">{{ user.email }}</div>
+        <div class="user-location">📍 {{ user.location }}</div>
+      </div>
+      <div class="user-action">
+        <span class="friend-badge" *ngIf="isFriend(user.id)">✓ Friends</span>
+        <button
+          *ngIf="!isFriend(user.id)"
+          (click)="sendRequest(user.id)"
+          class="btn-primary"
+        >
+          Add Friend
+        </button>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="allUsers.length === 0">
+      No other users found.
+    </div>
+  </div>
+</div>

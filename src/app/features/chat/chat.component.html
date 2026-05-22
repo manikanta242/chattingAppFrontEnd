@@ -1,0 +1,111 @@
+<div class="chat-layout">
+  <!-- ── LEFT SIDEBAR: Friends List ── -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h3>Chats</h3>
+      <div class="sidebar-actions">
+        <a
+          routerLink="/friends/requests"
+          class="icon-btn"
+          title="Friend Requests"
+          >🔔
+          <span class="badge" *ngIf="pendingCount > 0">
+            {{ pendingCount }}
+          </span></a
+        >
+        <a routerLink="/friends" class="icon-btn" title="New friends">👥 </a>
+        <button (click)="logout()" class="icon-btn" title="Logout">🚪</button>
+      </div>
+    </div>
+
+    <!-- Friend list — each row is a friend you can chat with -->
+    <div class="friend-list">
+      <div
+        class="friend-item"
+        *ngFor="let friend of friends"
+        [class.active]="selectedFriend?.id === friend.id"
+        (click)="openChat(friend)"
+      >
+        <div class="avatar">
+          {{ friend.name?.charAt(0).toUpperCase() }}
+        </div>
+        <div class="friend-info">
+          <span class="friend-name">{{ friend.name }}</span>
+          <!-- Green dot if online -->
+          <span
+            class="status-dot"
+            [class.online]="onlineStatus[friend.id]"
+            [class.offline]="!onlineStatus[friend.id]"
+          >
+          </span>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="friends.length === 0">
+        No friends yet. <a routerLink="/friends">Add friends</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RIGHT PANEL: Chat Window ── -->
+  <div class="chat-window">
+    <!-- No chat selected -->
+    <div class="no-chat" *ngIf="!selectedFriend">
+      <p>👈 Select a friend to start chatting</p>
+    </div>
+
+    <!-- Chat open -->
+    <ng-container *ngIf="selectedFriend">
+      <!-- Chat header -->
+      <div class="chat-header">
+        <div class="chat-header-info">
+          <span class="chat-name"> User {{ getFriendUserId() }} </span>
+          <span class="chat-status">
+            <span *ngIf="isFriendTyping()" class="typing-text">typing...</span>
+            <span
+              *ngIf="!isFriendTyping() && isFriendOnline()"
+              class="online-text"
+              >● Online</span
+            >
+            <span
+              *ngIf="!isFriendTyping() && !isFriendOnline()"
+              class="offline-text"
+              >● Offline</span
+            >
+          </span>
+        </div>
+      </div>
+
+      <!-- Messages area -->
+      <div class="messages-area">
+        <div
+          class="message-bubble"
+          *ngFor="let msg of messages"
+          [class.sent]="msg.sender_id === currentUserId"
+          [class.received]="msg.sender_id !== currentUserId"
+        >
+          <!-- context is your DB column name -->
+          <div class="bubble-text">{{ msg.context }}</div>
+          <div class="bubble-time">{{ msg.created_at | slice: 11 : 16 }}</div>
+        </div>
+
+        <!-- Scroll anchor -->
+        <div #messagesEnd></div>
+      </div>
+
+      <!-- Message input -->
+      <div class="message-input-area">
+        <input
+          type="text"
+          [(ngModel)]="newMessage"
+          (input)="onTyping()"
+          (keyup.enter)="sendMessage()"
+          placeholder="Type a message..."
+        />
+        <button (click)="sendMessage()" [disabled]="!newMessage.trim()">
+          Send
+        </button>
+      </div>
+    </ng-container>
+  </div>
+</div>
