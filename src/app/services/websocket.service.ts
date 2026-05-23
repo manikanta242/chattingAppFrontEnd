@@ -6,15 +6,14 @@ import { environment } from '../../../environment/environment';
 
 @Injectable({ providedIn: 'root' })
 export class WebSocketService {
-
   private socket!: WebSocket;
   private messageSubject = new Subject<WsEvent>();
 
   // Any component can subscribe to this to receive real-time events
   messages$: Observable<WsEvent> = this.messageSubject.asObservable();
 
-  private reconnectDelay = 3000;   // retry after 3s if disconnected
-  private isConnected    = false;
+  private reconnectDelay = 3000; // retry after 3s if disconnected
+  private isConnected = false;
 
   constructor(private authService: AuthService) {}
 
@@ -36,7 +35,7 @@ export class WebSocketService {
     // Every message from server flows through messageSubject
     // Components subscribe to messages$ to receive them
     this.socket.onmessage = (event) => {
-      const data: WsEvent = JSON.parse(event.data);
+      const data: WsEvent = JSON.parse(event.data);      
       this.messageSubject.next(data);
     };
 
@@ -53,6 +52,10 @@ export class WebSocketService {
         setTimeout(() => this.connect(), this.reconnectDelay);
       }
     };
+  }
+
+  isOpen(): boolean {
+    return this.socket?.readyState === WebSocket.OPEN;
   }
 
   // ── SEND: Chat message ───────────────────────────────────

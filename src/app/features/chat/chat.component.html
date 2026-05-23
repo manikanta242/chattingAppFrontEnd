@@ -59,20 +59,24 @@
       <!-- Chat header -->
       <div class="chat-header">
         <div class="chat-header-info">
-          <span class="chat-name"> User {{ getFriendUserId() }} </span>
-          <span class="chat-status">
-            <span *ngIf="isFriendTyping()" class="typing-text">typing...</span>
-            <span
-              *ngIf="!isFriendTyping() && isFriendOnline()"
-              class="online-text"
-              >● Online</span
-            >
-            <span
-              *ngIf="!isFriendTyping() && !isFriendOnline()"
-              class="offline-text"
-              >● Offline</span
-            >
+          <span class="chat-name"> {{ selectedFriend.name }} </span>
+          <!-- ✅ Status dot -->
+          <span
+            [class.online]="isFriendOnline(selectedFriend.id)"
+            [class.offline]="!isFriendOnline(selectedFriend.id)"
+          >
           </span>
+
+          <!-- ✅ Online / Offline text -->
+          <span
+            *ngIf="isFriendOnline(selectedFriend.id); else offlineBlock"
+            class="online-text"
+          >
+            ● Online
+          </span>
+          <ng-template #offlineBlock>
+            <span class="offline-text">● Offline</span>
+          </ng-template>
         </div>
       </div>
 
@@ -98,7 +102,6 @@
         <input
           type="text"
           [(ngModel)]="newMessage"
-          (input)="onTyping()"
           (keyup.enter)="sendMessage()"
           placeholder="Type a message..."
         />

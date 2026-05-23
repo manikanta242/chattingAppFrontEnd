@@ -39,8 +39,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   currentUserId: number;
   currentUserName: string;
   pendingRequests: any[] = [];
-
-  onlineStatus: OnlineStatus = {}; // { userId: true/false }
+  onlineStatus: { [user_id: number]: boolean } = {};
   typingStatus: TypingStatus = {}; // { userId: true/false }
 
   private typingTimer: any; // debounce timer
@@ -77,10 +76,8 @@ export class ChatComponent implements OnInit, OnDestroy {
           // ✅ Spread — Angular detects change
           const statusMap: { [key: number]: boolean } = {};
           this.friends.forEach((friend) => {
-            console.log(friend);
-
-            statusMap[friend.id] = friend.status === 'online';
-          });          
+            statusMap[Number(friend.friend_id)] = friend.status === 'online'; // ✅
+          });
           this.onlineStatus = { ...statusMap };
         },
         error: (err) => {
@@ -100,21 +97,20 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
   // ── Open a chat with a friend ────────────────────────────
   openChat(friend: any): void {
+    console.log(friend);
+    
     this.selectedFriend = friend;
     this.messages = [];
     this.typingStatus = {};
 
     // Determine the friend's user id from FriendRequest row
-    const friendUserId =
-      friend.from_user === this.currentUserId
-        ? friend.to_user
-        : friend.from_user;
+    const selectedFriendId = this.selectedFriend.id;
 
     // Load chat history from POST /message/get-messages
     this.messageService
       .getMessages({
         sender_id: this.currentUserId,
-        receiver_id: friendUserId,
+        receiver_id: selectedFriendId,
       })
       .subscribe({
         next: (res) => {
@@ -122,7 +118,10 @@ export class ChatComponent implements OnInit, OnDestroy {
           this.scrollToBottom();
 
           // Send read receipt for the last message
-          this.wsService.sendRead(friendUserId);
+          // ✅ Only send read if socket is open
+          // if (this.wsService.isOpen()) {
+          this.wsService.sendRead(selectedFriendId);
+          // }
         },
       });
   }
@@ -131,10 +130,17 @@ export class ChatComponent implements OnInit, OnDestroy {
   listenToWebSocket(): void {
     this.wsSub = this.wsService.messages$.subscribe((event: WsEvent) => {
       switch (event.type) {
+        // ✅ Online / Offline status
+        case 'presence':
+          this.onlineStatus = {
+            ...this.onlineStatus,
+            [Number(event.user_id)]: event.status === 'online', // ✅ force number
+          };
+          break;
         // New message received
         case 'message':
           if (this.selectedFriend) {
-            const friendId = this.getFriendUserId();
+            const friendId = this.selectedFriend.id;
             if (
               event.sender_id === friendId ||
               event.receiver_id === friendId
@@ -171,8 +177,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   sendMessage(): void {
     const context = this.newMessage.trim();
     if (!context || !this.selectedFriend) return;
-
-    const friendUserId = this.getFriendUserId();
+    const friendUserId = this.selectedFriend.id;
 
     // Send via WebSocket — matches your ws event format:
     // { "type": "message", "receiver_id": 2, "context": "Hey!" }
@@ -181,40 +186,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.newMessage = '';
 
     // Stop typing indicator
-    this.wsService.sendTyping(friendUserId, false);
-  }
-
-  // ── Typing indicator — fires while user types ─────────────
-  onTyping(): void {
-    const friendUserId = this.getFriendUserId();
-    if (!friendUserId) return;
-
-    // Send typing: true
-    this.wsService.sendTyping(friendUserId, true);
-
-    // After 2 seconds of no typing → send typing: false
-    clearTimeout(this.typingTimer);
-    this.typingTimer = setTimeout(() => {
-      this.wsService.sendTyping(friendUserId, false);
-    }, 2000);
-  }
-
-  // ── Get the friend's user ID from FriendRequest row ───────
-  getFriendUserId(): number {
-    if (!this.selectedFriend) return 0;
-    return this.selectedFriend.from_user === this.currentUserId
-      ? this.selectedFriend.to_user
-      : this.selectedFriend.from_user;
-  }
-
-  // ── Is the current friend online? ────────────────────────
-  isFriendOnline(): boolean {
-    return this.onlineStatus[this.getFriendUserId()] || false;
-  }
-
-  // ── Is friend typing? ────────────────────────────────────
-  isFriendTyping(): boolean {
-    return this.typingStatus[this.getFriendUserId()] || false;
+    // this.wsService.sendTyping(friendUserId, false);
   }
 
   // ── Scroll chat to bottom ─────────────────────────────────
@@ -240,6 +212,10 @@ export class ChatComponent implements OnInit, OnDestroy {
         this.authService.clearSession(); // ✅ clear even if API fails
       },
     });
+  }
+
+  isFriendOnline(friendId: number): boolean {
+    return this.onlineStatus[Number(friendId)] ?? false; // ✅ force number
   }
 
   ngOnDestroy(): void {
