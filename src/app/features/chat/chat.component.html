@@ -34,8 +34,8 @@
           <!-- Green dot if online -->
           <span
             class="status-dot"
-            [class.online]="onlineStatus[friend.id]"
-            [class.offline]="!onlineStatus[friend.id]"
+            [class.online]="isFriendOnline(friend.id)"
+            [class.offline]="!isFriendOnline(friend.id)"
           >
           </span>
         </div>

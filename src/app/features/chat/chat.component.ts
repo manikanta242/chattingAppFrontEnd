@@ -98,7 +98,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   // ── Open a chat with a friend ────────────────────────────
   openChat(friend: any): void {
     console.log(friend);
-    
+
     this.selectedFriend = friend;
     this.messages = [];
     this.typingStatus = {};
@@ -160,12 +160,6 @@ export class ChatComponent implements OnInit, OnDestroy {
             }
           }
           break;
-
-        // ✅ Online / offline presence only
-        case 'presence':
-          this.onlineStatus[event.user_id] = event.status === 'online';
-          break;
-
         case 'error':
           console.error('WS Error:', event.message);
           break;
@@ -198,20 +192,8 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   // component.ts
   logout(): void {
-    const userId = localStorage.getItem('user_id')!; // ✅ get before clear
-
     this.wsService.disconnect(); // ✅ disconnect websocket
-
-    // ✅ Subscribe so HTTP actually fires
-    this.authService.logout(userId).subscribe({
-      next: () => {
-        this.authService.clearSession(); // ✅ clear after API success
-      },
-      error: (err) => {
-        console.error('Logout failed:', err);
-        this.authService.clearSession(); // ✅ clear even if API fails
-      },
-    });
+    this.authService.clearSession(); // ✅ clear after API success
   }
 
   isFriendOnline(friendId: number): boolean {
