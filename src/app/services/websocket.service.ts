@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Subject, Observable } from 'rxjs';
 import { AuthService } from './auth.service';
 import { WsEvent } from '../../../models/message.model';
-import { environment } from '../../../environment/environment';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class WebSocketService {
