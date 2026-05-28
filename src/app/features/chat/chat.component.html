@@ -1,6 +1,6 @@
 <div class="chat-layout">
   <!-- ── LEFT SIDEBAR: Friends List ── -->
-  <div class="sidebar">
+  <div class="sidebar" [class.mobile-hidden]="!mobileSidebarOpen">
     <div class="sidebar-header">
       <h3>Chats</h3>
       <div class="sidebar-actions">
@@ -48,7 +48,7 @@
   </div>
 
   <!-- ── RIGHT PANEL: Chat Window ── -->
-  <div class="chat-window">
+  <div class="chat-window" [class.mobile-visible]="!mobileSidebarOpen">
     <!-- No chat selected -->
     <div class="no-chat" *ngIf="!selectedFriend">
       <p>👈 Select a friend to start chatting</p>
@@ -58,6 +58,7 @@
     <ng-container *ngIf="selectedFriend">
       <!-- Chat header -->
       <div class="chat-header">
+        <button class="back-to-sidebar" (click)="backToSidebar()">← Back</button>
         <div class="chat-header-info">
           <span class="chat-name"> {{ selectedFriend.name }} </span>
           <!-- ✅ Status dot -->

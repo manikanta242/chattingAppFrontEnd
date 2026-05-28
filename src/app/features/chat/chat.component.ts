@@ -41,6 +41,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   pendingRequests: any[] = [];
   onlineStatus: { [user_id: number]: boolean } = {};
   typingStatus: TypingStatus = {}; // { userId: true/false }
+  mobileSidebarOpen = true;
 
   private typingTimer: any; // debounce timer
   private wsSub!: Subscription;
@@ -100,6 +101,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     console.log(friend);
 
     this.selectedFriend = friend;
+    this.mobileSidebarOpen = false;
     this.messages = [];
     this.typingStatus = {};
 
@@ -188,6 +190,10 @@ export class ChatComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       this.messagesEnd?.nativeElement?.scrollIntoView({ behavior: 'smooth' });
     }, 50);
+  }
+
+  backToSidebar(): void {
+    this.mobileSidebarOpen = true;
   }
 
   // component.ts
