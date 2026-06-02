@@ -13,10 +13,7 @@
     </div>
     <div class="icon-bar-bottom">
       <div class="icon-bar-avatar" (click)="goToProfile()" title="Profile">
-        <img
-          *ngIf="currentUser?.image"
-          [src]="'http://localhost:8000/' + currentUser.image"
-        />
+        <img *ngIf="currentUser?.image" [src]="api + '/' + currentUser.image" />
         <div *ngIf="!currentUser?.image" class="avatar-placeholder">
           {{ currentUser?.name?.charAt(0).toUpperCase() }}
         </div>

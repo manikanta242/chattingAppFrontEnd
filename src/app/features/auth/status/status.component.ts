@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { StatusService } from '../../../services/status.service';
 import { Location } from '@angular/common';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-status',
@@ -19,6 +20,7 @@ export class StatusComponent implements OnInit {
   selectedFile: File | null = null;
   imagePreview: string | null = null;
   loading = false;
+  api = environment.apiUrl;
 
   constructor(
     private statusService: StatusService,

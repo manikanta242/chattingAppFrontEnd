@@ -8,6 +8,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../services/auth.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-profile',
@@ -19,7 +20,7 @@ export class ProfileComponent implements OnChanges {
   @Input() user: any = {}; // receives user from parent
   @Output() close = new EventEmitter(); // tells parent to close modal
   @Output() updated = new EventEmitter(); // tells parent profile was updated
-
+  private api = environment.apiUrl;
   imagePreview: string | null = null;
   selectedFile: File | null = null;
   profileSuccess = '';
@@ -31,7 +32,7 @@ export class ProfileComponent implements OnChanges {
   ngOnChanges() {
     // when user data arrives from parent, set image preview
     if (this.user?.image) {
-      this.imagePreview = `http://localhost:8000/${this.user.image}`;
+      this.imagePreview = `${this.api}/${this.user.image}`;
     }
   }
 

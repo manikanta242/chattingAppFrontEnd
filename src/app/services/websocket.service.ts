@@ -17,7 +17,6 @@ export class WebSocketService {
 
   constructor(private authService: AuthService) {}
 
-  // ── Connect to ws://localhost:8000/ws/chat?token=eyJ... ──
   connect(): void {
     // ✅ Check actual socket state, not just the flag
     if (this.socket && this.socket.readyState === WebSocket.OPEN) return;

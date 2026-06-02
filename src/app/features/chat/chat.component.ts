@@ -15,6 +15,7 @@ import { FriendService } from '../../services/friend.service';
 import { AuthService } from '../../services/auth.service';
 import { WebSocketService } from '../../services/websocket.service';
 import { ProfileComponent } from '../auth/profile/profile.component';
+import { environment } from '../../../environments/environment';
 interface OnlineStatus {
   [userId: number]: boolean;
 }
@@ -48,7 +49,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   pendingCount: number = 0;
   showProfile = false;
   currentUser: any = null;
-
+  api = environment.apiUrl;
   constructor(
     private wsService: WebSocketService,
     private messageService: MessageService,

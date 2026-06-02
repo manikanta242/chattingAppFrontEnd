@@ -51,7 +51,7 @@
       <div class="status-avatar-ring">
         <img
           *ngIf="user.image"
-          [src]="user.image ? 'http://localhost:8000/' + user.image : ''"
+          [src]="user.image ? api + '/' + user.image : ''"
           class="status-avatar-img"
           (error)="onImgError($event)"
         />
