@@ -2,12 +2,12 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
-import { environment } from '../../environments/environment';
 import {
   LoginRequest,
   LoginResponse,
   RegisterRequest,
 } from '../../../models/user.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -26,8 +26,12 @@ export class AuthService {
 
   // ── POST /auth/register ──────────────────────────────────
   // Body: { name, email, phonenumber, password, location }
-  register(data: RegisterRequest): Observable<any> {
+  register(data: FormData): Observable<any> {
     return this.http.post(`${this.api}/auth/register`, data);
+  }
+
+  verifyEmail(token: string): Observable<any> {
+    return this.http.get(`${this.api}/auth/verify-email?token=${token}`);
   }
 
   // ── POST /auth/login ─────────────────────────────────────
@@ -36,16 +40,25 @@ export class AuthService {
   login(data: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.api}/auth/login`, data).pipe(
       tap((response) => {
-        console.log('repsonse', response);
-
+        const rawToken = response.token.replace(/^bearer\s+/i, '').trim();
         // Save to localStorage so user stays logged in after refresh
-        localStorage.setItem('token', response.token);
+        localStorage.setItem('token', rawToken);
         localStorage.setItem('user_id', String(response.user_id));
         localStorage.setItem('name', response.name);
         localStorage.setItem('email', response.email);
-        this.currentUserSubject.next(response);
+        localStorage.setItem('image', response.image || ''); // ✅
+
+        this.currentUserSubject.next({ ...response, token: rawToken });
       }),
     );
+  }
+
+  getProfile(): Observable<any> {
+    return this.http.get(`${this.api}/auth/profile`);
+  }
+
+  updateProfile(formData: FormData): Observable<any> {
+    return this.http.put(`${this.api}/auth/profile`, formData);
   }
 
   // ── GET /auth/user ───────────────────────────────────────
@@ -57,6 +70,24 @@ export class AuthService {
     return this.http.get(`${this.api}/friends/registered-users`);
   }
 
+  forgotPassword(email: string): Observable<any> {
+    const formData = new FormData();
+    formData.append('email', email);
+    return this.http.post(`${this.api}/auth/forgot-password`, formData);
+  }
+
+  resetPassword(
+    token: string,
+    newPassword: string,
+    confirmPassword: string,
+  ): Observable<any> {
+    const formData = new FormData();
+    formData.append('token', token);
+    formData.append('new_password', newPassword);
+    formData.append('confirm_password', confirmPassword);
+    return this.http.post(`${this.api}/auth/reset-password`, formData);
+  }
+
   logout(user_id: string): Observable<any> {
     return this.http.post(`${this.api}/auth/logout`, {
       id: user_id,
@@ -65,9 +96,7 @@ export class AuthService {
 
   // ── Helpers ──────────────────────────────────────────────
   getToken(): string | null {
-    const raw = localStorage.getItem('token') || '';
-    // Your backend returns "Bearer eyJ..." — strip the prefix for WebSocket
-    return raw.replace('Bearer ', '').replace('bearer', '').trim();
+    return localStorage.getItem('token');
   }
 
   getUserId(): number {
@@ -76,6 +105,10 @@ export class AuthService {
 
   getUserName(): string {
     return localStorage.getItem('name') || '';
+  }
+
+  getUserImage(): string {
+    return localStorage.getItem('image') || '';
   }
 
   isLoggedIn(): boolean {

@@ -3,7 +3,6 @@
     <h2>Login</h2>
 
     <form (ngSubmit)="onSubmit()">
-
       <div class="form-group">
         <label>Email</label>
         <input type="email" [(ngModel)]="form.email" name="email"
@@ -16,14 +15,16 @@
                placeholder="Password" required />
       </div>
 
-      <!-- Error message from server -->
       <p class="error" *ngIf="error">{{ error }}</p>
 
       <button type="submit" [disabled]="loading">
         {{ loading ? 'Logging in...' : 'Login' }}
       </button>
-
     </form>
+
+    <p class="switch-link">
+      <a routerLink="/forgot-password">Forgot Password?</a>
+    </p>
 
     <p class="switch-link">
       Don't have an account? <a routerLink="/register">Register</a>

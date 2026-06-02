@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
 import {
   FriendsListRequest,
   SendFriendRequest,
 } from '../../../models/friend.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class FriendService {
@@ -47,5 +47,9 @@ export class FriendService {
   // Body: { from_user: 1 }
   getFriendsList(data: FriendsListRequest): Observable<any> {
     return this.http.post(`${this.api}/friends/friend-list`, data);
+  }
+
+  declineRequest(data: SendFriendRequest): Observable<any> {
+    return this.http.post(`${this.api}/friends/decline`, data);
   }
 }

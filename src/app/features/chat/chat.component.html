@@ -1,43 +1,78 @@
 <div class="chat-layout">
   <!-- ── LEFT SIDEBAR: Friends List ── -->
+  <!-- ── FAR LEFT ICON BAR ── -->
+  <div class="icon-bar">
+    <div class="icon-bar-top">
+      <a routerLink="/chat" class="icon-bar-btn active" title="Chats">💬</a>
+      <a routerLink="/status" class="icon-bar-btn" title="Status">🔵</a>
+      <a routerLink="/friends" class="icon-bar-btn" title="Friends">👥</a>
+      <a routerLink="/friends/requests" class="icon-bar-btn" title="Requests">
+        🔔
+        <span class="badge" *ngIf="pendingCount > 0">{{ pendingCount }}</span>
+      </a>
+    </div>
+    <div class="icon-bar-bottom">
+      <div class="icon-bar-avatar" (click)="goToProfile()" title="Profile">
+        <img
+          *ngIf="currentUser?.image"
+          [src]="'http://localhost:8000/' + currentUser.image"
+        />
+        <div *ngIf="!currentUser?.image" class="avatar-placeholder">
+          {{ currentUser?.name?.charAt(0).toUpperCase() }}
+        </div>
+      </div>
+      <button (click)="logout()" class="icon-bar-btn" title="Logout">🚪</button>
+    </div>
+  </div>
+
+  <!-- Logout Confirmation Modal -->
+  <div class="modal-overlay" *ngIf="showLogoutModal" (click)="cancelLogout()">
+    <div class="modal-box logout-modal" (click)="$event.stopPropagation()">
+      <div style="text-align: center">
+        <div style="font-size: 48px">🚪</div>
+        <h3 style="margin: 12px 0 8px">Logout</h3>
+        <p style="color: #aaa; font-size: 0.9rem">
+          Are you sure you want to logout?
+        </p>
+      </div>
+      <div class="logout-actions">
+        <button class="btn-cancel" (click)="cancelLogout()">Cancel</button>
+        <button class="btn-confirm" (click)="confirmLogout()">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── LEFT SIDEBAR ── -->
   <div class="sidebar" [class.mobile-hidden]="!mobileSidebarOpen">
     <div class="sidebar-header">
       <h3>Chats</h3>
-      <div class="sidebar-actions">
-        <a
-          routerLink="/friends/requests"
-          class="icon-btn"
-          title="Friend Requests"
-          >🔔
-          <span class="badge" *ngIf="pendingCount > 0">
-            {{ pendingCount }}
-          </span></a
-        >
-        <a routerLink="/friends" class="icon-btn" title="New friends">👥 </a>
-        <button (click)="logout()" class="icon-btn" title="Logout">🚪</button>
-      </div>
     </div>
 
-    <!-- Friend list — each row is a friend you can chat with -->
+    <!-- ✅ friends list goes here -->
     <div class="friend-list">
       <div
         class="friend-item"
         *ngFor="let friend of friends"
-        [class.active]="selectedFriend?.id === friend.id"
+        [class.active]="selectedFriend?.friend_id === friend.friend_id"
         (click)="openChat(friend)"
       >
-        <div class="avatar">
-          {{ friend.name?.charAt(0).toUpperCase() }}
+        <!-- {{friend | json}} -->
+        <div class="icon-bar-avatar" (click)="goToProfile()" title="Profile">
+          <img
+            *ngIf="friend?.image"
+            [src]="'http://localhost:8000/' + friend.image"
+          />
+          <div *ngIf="!friend?.image" class="avatar-placeholder">
+            {{ friend?.name?.charAt(0).toUpperCase() }}
+          </div>
         </div>
         <div class="friend-info">
           <span class="friend-name">{{ friend.name }}</span>
-          <!-- Green dot if online -->
           <span
             class="status-dot"
             [class.online]="isFriendOnline(friend.id)"
             [class.offline]="!isFriendOnline(friend.id)"
-          >
-          </span>
+          ></span>
         </div>
       </div>
 
@@ -46,6 +81,15 @@
       </div>
     </div>
   </div>
+
+  <!-- Profile Modal -->
+  <app-profile
+    *ngIf="showProfile"
+    [user]="currentUser"
+    (close)="closeProfile()"
+    (updated)="onProfileUpdated($event)"
+  >
+  </app-profile>
 
   <!-- ── RIGHT PANEL: Chat Window ── -->
   <div class="chat-window" [class.mobile-visible]="!mobileSidebarOpen">
@@ -58,7 +102,9 @@
     <ng-container *ngIf="selectedFriend">
       <!-- Chat header -->
       <div class="chat-header">
-        <button class="back-to-sidebar" (click)="backToSidebar()">← Back</button>
+        <button class="back-to-sidebar" (click)="backToSidebar()">
+          ← Back
+        </button>
         <div class="chat-header-info">
           <span class="chat-name"> {{ selectedFriend.name }} </span>
           <!-- ✅ Status dot -->
@@ -84,6 +130,12 @@
       <!-- Messages area -->
       <div class="messages-area">
         <div
+          class="typing-indicator"
+          *ngIf="selectedFriend && isFriendTyping(selectedFriend.friend_id)"
+        >
+          <span>{{ selectedFriend.name }} is typing...</span>
+        </div>
+        <div
           class="message-bubble"
           *ngFor="let msg of messages"
           [class.sent]="msg.sender_id === currentUserId"
@@ -103,6 +155,7 @@
         <input
           type="text"
           [(ngModel)]="newMessage"
+          (input)="onTyping()"
           (keyup.enter)="sendMessage()"
           placeholder="Type a message..."
         />

@@ -1,50 +1,109 @@
 <div class="auth-container">
-  <div class="auth-card">
+  <!-- ── REGISTER FORM — hide after success ── -->
+  <div class="auth-card" *ngIf="!success">
     <h2>Register</h2>
 
     <form (ngSubmit)="onSubmit()">
-
       <div class="form-group">
         <label>Name</label>
-        <input type="text" [(ngModel)]="form.name" name="name"
-               placeholder="Your full name" required />
+        <input
+          type="text"
+          [(ngModel)]="form.name"
+          name="name"
+          placeholder="Your full name"
+          required
+        />
       </div>
-
       <div class="form-group">
         <label>Email</label>
-        <input type="email" [(ngModel)]="form.email" name="email"
-               placeholder="your@email.com" required />
+        <input
+          type="email"
+          [(ngModel)]="form.email"
+          name="email"
+          placeholder="your@email.com"
+          required
+        />
       </div>
-
       <div class="form-group">
         <label>Phone Number</label>
-        <input type="text" [(ngModel)]="form.phonenumber" name="phonenumber"
-               placeholder="+1234567890" required />
+        <input
+          type="text"
+          [(ngModel)]="form.phonenumber"
+          name="phonenumber"
+          placeholder="+1234567890"
+          required
+        />
       </div>
-
       <div class="form-group">
         <label>Password</label>
-        <input type="password" [(ngModel)]="form.password" name="password"
-               placeholder="Password" required />
+        <input
+          type="password"
+          [(ngModel)]="form.password"
+          name="password"
+          placeholder="Password"
+          required
+        />
       </div>
-
       <div class="form-group">
         <label>Location</label>
-        <input type="text" [(ngModel)]="form.location" name="location"
-               placeholder="City, Country" required />
+        <input
+          type="text"
+          [(ngModel)]="form.location"
+          name="location"
+          placeholder="City, Country"
+          required
+        />
+      </div>
+      <div class="form-group">
+        <label>Profile Picture (optional)</label>
+        <input
+          type="file"
+          accept="image/*"
+          (change)="onImageSelected($event)"
+          name="image"
+        />
+        <div *ngIf="imagePreview" style="margin-top: 10px">
+          <img
+            [src]="imagePreview"
+            alt="Preview"
+            style="
+              width: 72px;
+              height: 72px;
+              border-radius: 50%;
+              object-fit: cover;
+            "
+          />
+        </div>
       </div>
 
-      <p class="success" *ngIf="success">{{ success }}</p>
-      <p class="error"   *ngIf="error">{{ error }}</p>
+      <p class="error" *ngIf="error">{{ error }}</p>
 
       <button type="submit" [disabled]="loading">
-        {{ loading ? 'Registering...' : 'Register' }}
+        {{ loading ? "Registering..." : "Register" }}
       </button>
-
     </form>
 
     <p class="switch-link">
       Already have an account? <a routerLink="/login">Login</a>
     </p>
+  </div>
+
+  <!-- ── SUCCESS — show after registration ── -->
+  <div class="auth-card" *ngIf="success" style="text-align: center">
+    <div style="font-size: 60px">📧</div>
+    <h2>Check Your Email!</h2>
+    <p>
+      We sent a verification link to <strong>{{ form.email }}</strong>
+    </p>
+    <p style="color: #888; font-size: 0.85rem; margin-top: 8px">
+      Click the link in the email to activate your account.
+    </p>
+    <a
+      routerLink="/login"
+      class="btn-primary"
+      style="display: inline-block; margin-top: 16px"
+    >
+      Go to Login
+    </a>
   </div>
 </div>

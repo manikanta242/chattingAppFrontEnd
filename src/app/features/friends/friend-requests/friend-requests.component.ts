@@ -43,7 +43,7 @@ export class FriendRequestsComponent implements OnInit {
   acceptRequest(request: any): void {
     this.friendService
       .acceptRequest({
-        from_user: request.id,
+        from_user: request.friend_id,
         to_user: this.currentUserId,
       })
       .subscribe({
@@ -54,6 +54,24 @@ export class FriendRequestsComponent implements OnInit {
             (r) => r.id !== request.id,
           );
         },
+      });
+  }
+
+  declineRequest(request: any): void {
+    this.friendService
+      .declineRequest({
+        from_user: request.friend_id,
+        to_user: this.currentUserId,
+      })
+      .subscribe({
+        next: (res) => {
+          this.message = res.response || 'Friend request declined.';
+          this.pendingRequests = this.pendingRequests.filter(
+            (r) => r.friend_id !== request.friend_id,
+          );
+          this.friendService.setPendingCount(this.pendingRequests.length);
+        },
+        error: (err) => console.error('Failed to decline request:', err),
       });
   }
 }

@@ -7,14 +7,14 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { Message, WsEvent } from '../../../../models/message.model';
 import { MessageService } from '../../services/message.service';
 import { FriendService } from '../../services/friend.service';
 import { AuthService } from '../../services/auth.service';
 import { WebSocketService } from '../../services/websocket.service';
-
+import { ProfileComponent } from '../auth/profile/profile.component';
 interface OnlineStatus {
   [userId: number]: boolean;
 }
@@ -25,7 +25,7 @@ interface TypingStatus {
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, ProfileComponent],
   templateUrl: './chat.component.html',
 })
 export class ChatComponent implements OnInit, OnDestroy {
@@ -42,10 +42,12 @@ export class ChatComponent implements OnInit, OnDestroy {
   onlineStatus: { [user_id: number]: boolean } = {};
   typingStatus: TypingStatus = {}; // { userId: true/false }
   mobileSidebarOpen = true;
-
+  unreadCounts: { [friendId: number]: number } = {};
   private typingTimer: any; // debounce timer
   private wsSub!: Subscription;
   pendingCount: number = 0;
+  showProfile = false;
+  currentUser: any = null;
 
   constructor(
     private wsService: WebSocketService,
@@ -64,6 +66,10 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.friendService.pendingCount$.subscribe((count) => {
       this.pendingCount = count;
     });
+    this.authService.getProfile().subscribe({
+      next: (res) => (this.currentUser = res),
+    });
+    console.log('currentUser', this.currentUser);
   }
 
   // ── Load accepted friends from POST /friends/friend-list ──
@@ -106,13 +112,16 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.typingStatus = {};
 
     // Determine the friend's user id from FriendRequest row
-    const selectedFriendId = this.selectedFriend.id;
+    const friendUserId = Number(friend.friend_id);
+
+    // ✅ Clear unread badge when opening chat
+    this.unreadCounts = { ...this.unreadCounts, [friendUserId]: 0 };
 
     // Load chat history from POST /message/get-messages
     this.messageService
       .getMessages({
         sender_id: this.currentUserId,
-        receiver_id: selectedFriendId,
+        receiver_id: friendUserId,
       })
       .subscribe({
         next: (res) => {
@@ -122,7 +131,7 @@ export class ChatComponent implements OnInit, OnDestroy {
           // Send read receipt for the last message
           // ✅ Only send read if socket is open
           // if (this.wsService.isOpen()) {
-          this.wsService.sendRead(selectedFriendId);
+          this.wsService.sendRead(friendUserId);
           // }
         },
       });
@@ -142,7 +151,7 @@ export class ChatComponent implements OnInit, OnDestroy {
         // New message received
         case 'message':
           if (this.selectedFriend) {
-            const friendId = this.selectedFriend.id;
+            const friendId = this.selectedFriend.friend_id;
             if (
               event.sender_id === friendId ||
               event.receiver_id === friendId
@@ -160,7 +169,27 @@ export class ChatComponent implements OnInit, OnDestroy {
                 this.scrollToBottom();
               }
             }
+            // ✅ Increment unread if message is from someone other than open chat
+            if (event.sender_id !== this.currentUserId) {
+              const isCurrentChat =
+                this.selectedFriend &&
+                Number(this.selectedFriend.friend_id) === event.sender_id;
+
+              if (!isCurrentChat) {
+                this.unreadCounts = {
+                  ...this.unreadCounts,
+                  [event.sender_id]:
+                    (this.unreadCounts[event.sender_id] || 0) + 1,
+                };
+              }
+            }
           }
+          break;
+        case 'typing':
+          this.typingStatus = {
+            ...this.typingStatus,
+            [Number(event.from_user_id)]: event.is_typing,
+          };
           break;
         case 'error':
           console.error('WS Error:', event.message);
@@ -173,7 +202,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   sendMessage(): void {
     const context = this.newMessage.trim();
     if (!context || !this.selectedFriend) return;
-    const friendUserId = this.selectedFriend.id;
+    const friendUserId = this.selectedFriend.friend_id;
 
     // Send via WebSocket — matches your ws event format:
     // { "type": "message", "receiver_id": 2, "context": "Hey!" }
@@ -182,7 +211,25 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.newMessage = '';
 
     // Stop typing indicator
-    // this.wsService.sendTyping(friendUserId, false);
+    this.wsService.sendTyping(friendUserId, false);
+    clearTimeout(this.typingTimer);
+  }
+
+  onTyping(): void {
+    if (!this.selectedFriend) return;
+    const friendUserId = Number(this.selectedFriend.friend_id);
+
+    this.wsService.sendTyping(friendUserId, true);
+
+    // Auto-stop after 2s of no input
+    clearTimeout(this.typingTimer);
+    this.typingTimer = setTimeout(() => {
+      this.wsService.sendTyping(friendUserId, false);
+    }, 2000);
+  }
+
+  isFriendTyping(friendId: number): boolean {
+    return this.typingStatus[Number(friendId)] ?? false;
   }
 
   // ── Scroll chat to bottom ─────────────────────────────────
@@ -196,14 +243,53 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.mobileSidebarOpen = true;
   }
 
+  showLogoutModal = false;
+
+  // ✅ replace your existing logout() with this
+  logout() {
+    this.showLogoutModal = true; // show modal
+  }
+
+  cancelLogout() {
+    this.showLogoutModal = false; // close modal
+  }
+
   // component.ts
-  logout(): void {
-    this.wsService.disconnect(); // ✅ disconnect websocket
-    this.authService.clearSession(); // ✅ clear after API success
+  confirmLogout(): void {
+    this.showLogoutModal = false;
+
+    const userId = String(this.currentUserId);
+    this.authService.logout(userId).subscribe({
+      next: () => {
+        this.wsService.disconnect();
+        this.authService.clearSession();
+      },
+      error: () => {
+        // Even if API fails, still disconnect and clear locally
+        this.wsService.disconnect();
+        this.authService.clearSession();
+      },
+    });
+  }
+
+  goToProfile() {
+    this.showProfile = true;
+  }
+  closeProfile() {
+    this.showProfile = false;
+  }
+
+  onProfileUpdated(updatedUser: any) {
+    this.currentUser = { ...this.currentUser, ...updatedUser }; // merge updated data
+    this.showProfile = false; // close modal after save
   }
 
   isFriendOnline(friendId: number): boolean {
     return this.onlineStatus[Number(friendId)] ?? false; // ✅ force number
+  }
+
+  getUnreadCount(friendId: number): number {
+    return this.unreadCounts[Number(friendId)] || 0;
   }
 
   ngOnDestroy(): void {

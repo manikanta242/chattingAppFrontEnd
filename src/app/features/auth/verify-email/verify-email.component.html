@@ -1,0 +1,34 @@
+<div class="auth-container">
+  <div class="auth-card" style="text-align:center;">
+
+    <!-- Loading -->
+    <div *ngIf="status === 'loading'">
+      <div class="spinner"></div>
+      <p>Verifying your email...</p>
+    </div>
+
+    <!-- Success -->
+    <div *ngIf="status === 'success'">
+      <div style="font-size:60px;">✅</div>
+      <h2 style="color:#27ae60; margin:16px 0;">Email Verified!</h2>
+      <p>{{ message }}</p>
+      <p style="color:#888; margin-top:8px;">Redirecting to login...</p>
+      <a routerLink="/login" class="btn-primary"
+         style="display:inline-block; margin-top:16px;">
+        Go to Login
+      </a>
+    </div>
+
+    <!-- Error -->
+    <div *ngIf="status === 'error'">
+      <div style="font-size:60px;">❌</div>
+      <h2 style="color:#e74c3c; margin:16px 0;">Verification Failed</h2>
+      <p>{{ message }}</p>
+      <a routerLink="/register" class="btn-primary"
+         style="display:inline-block; margin-top:16px;">
+        Register Again
+      </a>
+    </div>
+
+  </div>
+</div>

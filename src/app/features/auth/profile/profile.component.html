@@ -1,0 +1,91 @@
+<!-- Modal Overlay -->
+<div class="modal-overlay" (click)="closeModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="modal-header">
+      <h3>My Profile</h3>
+      <button (click)="closeModal()">✕</button>
+    </div>
+
+    <!-- Avatar -->
+    <div class="modal-avatar">
+      <img
+        *ngIf="imagePreview"
+        [src]="imagePreview"
+        style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover"
+      />
+      <div *ngIf="!imagePreview" class="avatar-placeholder-lg">
+        {{ user?.name?.charAt(0).toUpperCase() }}
+      </div>
+      <label class="change-photo-btn">
+        📷 Change Photo
+        <input
+          type="file"
+          accept="image/*"
+          (change)="onImageSelected($event)"
+          hidden
+        />
+      </label>
+    </div>
+
+    <!-- Form -->
+    <div class="modal-form">
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" [(ngModel)]="user.name" />
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="text" [value]="user.email" disabled />
+      </div>
+      <div class="form-group">
+        <label>Phone</label>
+        <input type="text" [(ngModel)]="user.phonenumber" />
+      </div>
+      <div class="form-group">
+        <label>Location</label>
+        <input type="text" [(ngModel)]="user.location" />
+      </div>
+    </div>
+
+    <p *ngIf="profileSuccess" style="color: green">{{ profileSuccess }}</p>
+    <p *ngIf="profileError" style="color: red">{{ profileError }}</p>
+
+    <button
+      class="save-btn"
+      (click)="saveProfile()"
+      [disabled]="profileLoading"
+    >
+      {{ profileLoading ? "Saving..." : "Save Changes" }}
+    </button>
+    <!-- at the bottom of your modal-box, after save-btn -->
+
+    <hr style="border-color: #444; margin: 16px 0" />
+
+    <!-- Change Password — sends reset email -->
+    <div style="text-align: center">
+      <p style="color: #aaa; font-size: 0.85rem; margin-bottom: 8px">
+        Want to change your password?
+      </p>
+      <button
+        class="change-pass-btn"
+        (click)="sendPasswordReset()"
+        [disabled]="resetLoading"
+      >
+        🔒 {{ resetLoading ? "Sending..." : "Change Password" }}
+      </button>
+      <p
+        *ngIf="resetSuccess"
+        style="color: green; font-size: 0.85rem; margin-top: 8px"
+      >
+        {{ resetSuccess }}
+      </p>
+      <p
+        *ngIf="resetError"
+        style="color: red; font-size: 0.85rem; margin-top: 8px"
+      >
+        {{ resetError }}
+      </p>
+    </div>
+  </div>
+</div>

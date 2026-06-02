@@ -6,6 +6,7 @@ export interface User {
   phonenumber: string;
   location:    string;
   status:      'online' | 'offline';
+  image?:      string;
 }
 
 // Matches auth/schemas.py userSchema
@@ -15,6 +16,7 @@ export interface RegisterRequest {
   phonenumber: string;
   password:    string;
   location:    string;
+
 }
 
 // Matches auth/schemas.py loginSchema
@@ -29,4 +31,5 @@ export interface LoginResponse {
   user_id: number;
   name:    string;
   email:   string;
+  image?:  string
 }

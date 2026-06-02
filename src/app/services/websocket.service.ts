@@ -19,7 +19,9 @@ export class WebSocketService {
 
   // ── Connect to ws://localhost:8000/ws/chat?token=eyJ... ──
   connect(): void {
-    if (this.isConnected) return;
+    // ✅ Check actual socket state, not just the flag
+    if (this.socket && this.socket.readyState === WebSocket.OPEN) return;
+    if (this.socket && this.socket.readyState === WebSocket.CONNECTING) return;
 
     const token = this.authService.getToken();
     if (!token) return;
@@ -32,22 +34,20 @@ export class WebSocketService {
       this.isConnected = true;
     };
 
-    // Every message from server flows through messageSubject
-    // Components subscribe to messages$ to receive them
     this.socket.onmessage = (event) => {
-      const data: WsEvent = JSON.parse(event.data);      
+      const data: WsEvent = JSON.parse(event.data);
       this.messageSubject.next(data);
     };
 
     this.socket.onerror = (error) => {
       console.error('❌ WebSocket error:', error);
+      this.isConnected = false;
     };
 
     this.socket.onclose = (event) => {
       console.log('🔌 WebSocket closed:', event.code);
       this.isConnected = false;
 
-      // Auto-reconnect if not intentional logout
       if (event.code !== 1000 && event.code !== 4001) {
         setTimeout(() => this.connect(), this.reconnectDelay);
       }
@@ -90,6 +90,19 @@ export class WebSocketService {
       this.socket.send(JSON.stringify(payload));
     } else {
       console.warn('WebSocket not open. Message not sent.');
+      this.isConnected = false;
+      this.connect();
+
+      // ✅ Wait for connection to open, then send
+      const waitAndSend = setInterval(() => {
+        if (this.socket.readyState === WebSocket.OPEN) {
+          this.socket.send(JSON.stringify(payload));
+          clearInterval(waitAndSend);
+        }
+      }, 100);
+
+      // ✅ Stop trying after 5 seconds
+      setTimeout(() => clearInterval(waitAndSend), 5000);
     }
   }
 }
