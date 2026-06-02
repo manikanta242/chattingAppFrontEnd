@@ -16,6 +16,8 @@ export class FriendListComponent implements OnInit {
   friends: any[] = []; // from POST /friends/friend-list
   currentUserId: number;
   message = '';
+  filteredUsers: any[] = [];
+  searchQuery: string = '';
 
   constructor(
     private friendService: FriendService,
@@ -34,6 +36,7 @@ export class FriendListComponent implements OnInit {
       next: (res) => {
         // Exclude yourself
         this.allUsers = res.response;
+        this.filteredUsers = res.response;
       },
     });
   }
@@ -49,6 +52,25 @@ export class FriendListComponent implements OnInit {
       });
   }
 
+  clearSearch() {
+    this.searchQuery = '';
+    this.filteredUsers = this.allUsers;
+  }
+
+  onSearch() {
+    const query = this.searchQuery.toLowerCase().trim();
+    if (!query) {
+      this.filteredUsers = this.allUsers;
+      return;
+    }
+    this.filteredUsers = this.allUsers.filter(
+      (user) =>
+        user.name.toLowerCase().includes(query) ||
+        user.email.toLowerCase().includes(query) ||
+        user.location?.toLowerCase().includes(query),
+    );
+  }
+
   // POST /friends/connect — send a friend request
   // Body: { from_user: currentUserId, to_user: user.id }
   sendRequest(toUserId: number): void {
@@ -59,7 +81,7 @@ export class FriendListComponent implements OnInit {
       })
       .subscribe({
         next: (res) => {
-          this.loadRegisteredUsers()
+          this.loadRegisteredUsers();
           this.message = res.response || 'Request sent!';
         },
       });

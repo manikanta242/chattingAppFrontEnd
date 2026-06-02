@@ -50,6 +50,8 @@ export class ChatComponent implements OnInit, OnDestroy {
   showProfile = false;
   currentUser: any = null;
   api = environment.apiUrl;
+  searchQuery: string = '';
+  filteredFriends: any[] = [];
   constructor(
     private wsService: WebSocketService,
     private messageService: MessageService,
@@ -80,6 +82,7 @@ export class ChatComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (res) => {
           this.friends = res.response || [];
+          this.filteredFriends = res.response;
 
           // ✅ Spread — Angular detects change
           const statusMap: { [key: number]: boolean } = {};
@@ -92,6 +95,24 @@ export class ChatComponent implements OnInit, OnDestroy {
           console.error('Failed to load friends:', err);
         },
       });
+  }
+
+  onSearch() {
+    const query = this.searchQuery.toLowerCase().trim();
+    if (!query) {
+      this.filteredFriends = this.friends; // show all if empty
+      return;
+    }
+    this.filteredFriends = this.friends.filter(
+      (friend) =>
+        friend.name.toLowerCase().includes(query) ||
+        friend.email?.toLowerCase().includes(query),
+    );
+  }
+
+  clearSearch() {
+    this.searchQuery = '';
+    this.filteredFriends = this.friends; // reset to all friends
   }
 
   loadPendingRequests(): void {
