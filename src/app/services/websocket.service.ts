@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Subject, Observable } from 'rxjs';
+import { ReplaySubject, Observable } from 'rxjs';
 import { AuthService } from './auth.service';
 import { WsEvent } from '../../../models/message.model';
 import { environment } from '../../environments/environment';
@@ -7,7 +7,7 @@ import { environment } from '../../environments/environment';
 @Injectable({ providedIn: 'root' })
 export class WebSocketService {
   private socket!: WebSocket;
-  private messageSubject = new Subject<WsEvent>();
+  private messageSubject = new ReplaySubject<WsEvent>(1);
 
   // Any component can subscribe to this to receive real-time events
   messages$: Observable<WsEvent> = this.messageSubject.asObservable();
@@ -23,6 +23,8 @@ export class WebSocketService {
     if (this.socket && this.socket.readyState === WebSocket.CONNECTING) return;
 
     const token = this.authService.getToken();
+    console.log('token, token', token);
+
     if (!token) return;
 
     const url = `${environment.wsUrl}/ws/chat?token=${token}`;
@@ -35,6 +37,7 @@ export class WebSocketService {
 
     this.socket.onmessage = (event) => {
       const data: WsEvent = JSON.parse(event.data);
+      console.log('📨 WS event received:', data); // ← confirms events flowing
       this.messageSubject.next(data);
     };
 

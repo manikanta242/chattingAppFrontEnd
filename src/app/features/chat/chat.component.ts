@@ -63,6 +63,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.wsService.connect();
     this.loadFriends();
     this.listenToWebSocket();
     this.loadPendingRequests();
@@ -72,7 +73,6 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.authService.getProfile().subscribe({
       next: (res) => (this.currentUser = res),
     });
-    console.log('currentUser', this.currentUser);
   }
 
   // ── Load accepted friends from POST /friends/friend-list ──
@@ -162,9 +162,19 @@ export class ChatComponent implements OnInit, OnDestroy {
   // ── Subscribe to all WebSocket events ────────────────────
   listenToWebSocket(): void {
     this.wsSub = this.wsService.messages$.subscribe((event: WsEvent) => {
+      console.log('evvvv', event);
       switch (event.type) {
         // ✅ Online / Offline status
         case 'presence':
+          console.log('presence user_id:', event.user_id, typeof event.user_id);
+          console.log(
+            'friends list:',
+            this.friends.map((f) => ({
+              name: f.name,
+              friend_id: f.friend_id,
+              type: typeof f.friend_id,
+            })),
+          );
           this.onlineStatus = {
             ...this.onlineStatus,
             [Number(event.user_id)]: event.status === 'online', // ✅ force number
@@ -172,38 +182,40 @@ export class ChatComponent implements OnInit, OnDestroy {
           break;
         // New message received
         case 'message':
-          if (this.selectedFriend) {
-            const friendId = this.selectedFriend.friend_id;
-            if (
-              event.sender_id === friendId ||
-              event.receiver_id === friendId
-            ) {
-              const exists = this.messages.some((m) => m.id === event.id);
-              if (!exists) {
-                this.messages.push({
-                  id: event.id,
-                  sender_id: event.sender_id,
-                  sender_name: event.sender_name,
-                  receiver_id: event.receiver_id,
-                  context: event.context,
-                  created_at: event.created_at,
-                });
-                this.scrollToBottom();
-              }
-            }
-            // ✅ Increment unread if message is from someone other than open chat
-            if (event.sender_id !== this.currentUserId) {
-              const isCurrentChat =
-                this.selectedFriend &&
-                Number(this.selectedFriend.friend_id) === event.sender_id;
+          // ✅ Always increment unread for incoming messages
+          if (event.sender_id !== this.currentUserId) {
+            const isCurrentChat =
+              this.selectedFriend &&
+              Number(this.selectedFriend.friend_id) === Number(event.sender_id);
 
-              if (!isCurrentChat) {
-                this.unreadCounts = {
-                  ...this.unreadCounts,
-                  [event.sender_id]:
-                    (this.unreadCounts[event.sender_id] || 0) + 1,
-                };
-              }
+            if (!isCurrentChat) {
+              this.unreadCounts = {
+                ...this.unreadCounts,
+                [Number(event.sender_id)]:
+                  (this.unreadCounts[Number(event.sender_id)] || 0) + 1,
+              };
+            }
+          }
+
+          // ✅ Add to messages only if this chat is open
+          if (
+            this.selectedFriend &&
+            (Number(event.sender_id) ===
+              Number(this.selectedFriend.friend_id) ||
+              Number(event.receiver_id) ===
+                Number(this.selectedFriend.friend_id))
+          ) {
+            const exists = this.messages.some((m) => m.id === event.id);
+            if (!exists) {
+              this.messages.push({
+                id: event.id,
+                sender_id: event.sender_id,
+                sender_name: event.sender_name,
+                receiver_id: event.receiver_id,
+                context: event.context,
+                created_at: event.created_at,
+              });
+              this.scrollToBottom();
             }
           }
           break;

@@ -1,5 +1,5 @@
 <div class="chat-layout">
-  <!-- ── LEFT SIDEBAR: Friends List ── -->
+
   <!-- ── FAR LEFT ICON BAR ── -->
   <div class="icon-bar">
     <div class="icon-bar-top">
@@ -22,28 +22,41 @@
     </div>
   </div>
 
-  <!-- Logout Confirmation Modal -->
+  <!-- ── LOGOUT MODAL ── -->
   <div class="modal-overlay" *ngIf="showLogoutModal" (click)="cancelLogout()">
     <div class="modal-box logout-modal" (click)="$event.stopPropagation()">
-      <div style="text-align: center">
-        <div style="font-size: 48px">🚪</div>
-        <h3 style="margin: 12px 0 8px">Logout</h3>
-        <p style="color: #aaa; font-size: 0.9rem">
+      <div style="text-align:center">
+        <div style="font-size:48px">🚪</div>
+        <h3 style="margin:12px 0 8px">Logout</h3>
+        <p style="color:#aaa; font-size:0.9rem">
           Are you sure you want to logout?
         </p>
       </div>
       <div class="logout-actions">
-        <button class="btn-cancel" (click)="cancelLogout()">Cancel</button>
+        <button class="btn-cancel"  (click)="cancelLogout()">Cancel</button>
         <button class="btn-confirm" (click)="confirmLogout()">Logout</button>
       </div>
     </div>
   </div>
 
-  <!-- ── LEFT SIDEBAR ── -->
+  <!-- ── PROFILE MODAL ── -->
+  <app-profile
+    *ngIf="showProfile"
+    [user]="currentUser"
+    (close)="closeProfile()"
+    (updated)="onProfileUpdated($event)"
+  ></app-profile>
+
+  <!-- ══════════════════════════════════════
+       LEFT SIDEBAR
+  ══════════════════════════════════════ -->
   <div class="sidebar" [class.mobile-hidden]="!mobileSidebarOpen">
+
     <div class="sidebar-header">
       <h3>Chats</h3>
     </div>
+
+    <!-- Search -->
     <div class="search-bar">
       <input
         type="text"
@@ -53,51 +66,61 @@
       />
       <button *ngIf="searchQuery" (click)="clearSearch()">✕</button>
     </div>
-    <!-- ✅ friends list goes here -->
+
+    <!-- Friend list -->
     <div class="friend-list">
+
       <div
         class="friend-item"
-        *ngFor="let friend of friends"
+        *ngFor="let friend of filteredFriends"
         [class.active]="selectedFriend?.friend_id === friend.friend_id"
+        [class.has-unread]="getUnreadCount(friend.friend_id) > 0"
         (click)="openChat(friend)"
       >
-        <!-- {{friend | json}} -->
-        <div class="icon-bar-avatar" (click)="goToProfile()" title="Profile">
+        <!-- Avatar -->
+        <div class="avatar">
           <img
             *ngIf="friend?.image"
             [src]="'http://localhost:8000/' + friend.image"
+            style="width:100%;height:100%;object-fit:cover;border-radius:50%"
           />
-          <div *ngIf="!friend?.image" class="avatar-placeholder">
+          <span *ngIf="!friend?.image">
             {{ friend?.name?.charAt(0).toUpperCase() }}
-          </div>
+          </span>
         </div>
+
+        <!-- Name + online dot -->
         <div class="friend-info">
           <span class="friend-name">{{ friend.name }}</span>
           <span
             class="status-dot"
-            [class.online]="isFriendOnline(friend.id)"
-            [class.offline]="!isFriendOnline(friend.id)"
+            [class.online]="isFriendOnline(friend.friend_id)"
+            [class.offline]="!isFriendOnline(friend.friend_id)"
           ></span>
         </div>
+
+        <!-- Unread badge -->
+        <span
+          class="unread-badge"
+          *ngIf="getUnreadCount(friend.friend_id) > 0"
+        >
+          {{ getUnreadCount(friend.friend_id) }}
+        </span>
       </div>
 
+      <!-- Empty state -->
       <div class="empty-state" *ngIf="friends.length === 0">
         No friends yet. <a routerLink="/friends">Add friends</a>
       </div>
+
     </div>
   </div>
 
-  <!-- Profile Modal -->
-  <app-profile
-    *ngIf="showProfile"
-    [user]="currentUser"
-    (close)="closeProfile()"
-    (updated)="onProfileUpdated($event)"
-  >
-  </app-profile>
-
-  <!-- ── RIGHT PANEL: Chat Window ── -->
+  <!-- ══════════════════════════════════════
+       RIGHT PANEL — CHAT WINDOW
+  ══════════════════════════════════════ -->
   <div class="chat-window" [class.mobile-visible]="!mobileSidebarOpen">
+
     <!-- No chat selected -->
     <div class="no-chat" *ngIf="!selectedFriend">
       <p>👈 Select a friend to start chatting</p>
@@ -105,57 +128,75 @@
 
     <!-- Chat open -->
     <ng-container *ngIf="selectedFriend">
-      <!-- Chat header -->
+
+      <!-- ── Chat Header ── -->
       <div class="chat-header">
-        <button class="back-to-sidebar" (click)="backToSidebar()">
-          ← Back
-        </button>
+        <button class="back-to-sidebar" (click)="backToSidebar()">← Back</button>
+
+        <!-- Friend avatar -->
+        <div class="avatar" style="width:40px;height:40px;flex-shrink:0">
+          <img
+            *ngIf="selectedFriend?.image"
+            [src]="'http://localhost:8000/' + selectedFriend.image"
+            style="width:100%;height:100%;object-fit:cover;border-radius:50%"
+          />
+          <span *ngIf="!selectedFriend?.image">
+            {{ selectedFriend?.name?.charAt(0).toUpperCase() }}
+          </span>
+        </div>
+
+        <!-- Name + status -->
         <div class="chat-header-info">
-          <span class="chat-name"> {{ selectedFriend.name }} </span>
-          <!-- ✅ Status dot -->
+          <span class="chat-name">{{ selectedFriend.name }}</span>
+
           <span
-            [class.online]="isFriendOnline(selectedFriend.id)"
-            [class.offline]="!isFriendOnline(selectedFriend.id)"
+            *ngIf="isFriendTyping(selectedFriend.friend_id); else statusBlock"
+            class="chat-status typing-text"
           >
+            typing...
           </span>
 
-          <!-- ✅ Online / Offline text -->
-          <span
-            *ngIf="isFriendOnline(selectedFriend.id); else offlineBlock"
-            class="online-text"
-          >
-            ● Online
-          </span>
-          <ng-template #offlineBlock>
-            <span class="offline-text">● Offline</span>
+          <ng-template #statusBlock>
+            <span
+              *ngIf="isFriendOnline(selectedFriend.friend_id); else offlineBlock"
+              class="chat-status online-text"
+            >
+              ● Online
+            </span>
+            <ng-template #offlineBlock>
+              <span class="chat-status offline-text">● Offline</span>
+            </ng-template>
           </ng-template>
         </div>
       </div>
 
-      <!-- Messages area -->
+      <!-- ── Messages Area ── -->
       <div class="messages-area">
+
+        <!-- Typing indicator -->
         <div
           class="typing-indicator"
-          *ngIf="selectedFriend && isFriendTyping(selectedFriend.friend_id)"
+          *ngIf="isFriendTyping(selectedFriend.friend_id)"
         >
-          <span>{{ selectedFriend.name }} is typing...</span>
+          {{ selectedFriend.name }} is typing...
         </div>
+
+        <!-- Messages -->
         <div
           class="message-bubble"
           *ngFor="let msg of messages"
           [class.sent]="msg.sender_id === currentUserId"
           [class.received]="msg.sender_id !== currentUserId"
         >
-          <!-- context is your DB column name -->
           <div class="bubble-text">{{ msg.context }}</div>
-          <div class="bubble-time">{{ msg.created_at | slice: 11 : 16 }}</div>
+          <div class="bubble-time">{{ msg.created_at | slice:11:16 }}</div>
         </div>
 
         <!-- Scroll anchor -->
         <div #messagesEnd></div>
       </div>
 
-      <!-- Message input -->
+      <!-- ── Message Input ── -->
       <div class="message-input-area">
         <input
           type="text"
@@ -168,6 +209,8 @@
           Send
         </button>
       </div>
+
     </ng-container>
   </div>
+
 </div>

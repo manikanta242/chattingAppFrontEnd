@@ -2136,3 +2136,149 @@ button:disabled {
 @media (max-width: 380px) {
   .auth-card { padding: 1.5rem 1rem; margin: 0 0.75rem; }
 }
+
+.requests-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 8px 0;
+}
+.requests-list::-webkit-scrollbar { width: 4px; }
+.requests-list::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+.request-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 24px;
+  border-bottom: 1px solid #1a1a1a;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  transition: background 0.15s;
+}
+.request-card:hover { background: #161616; }
+
+/* Left side — avatar + text together */
+.request-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;           /* ← prevents text overflow */
+}
+
+.request-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;           /* ← prevents text overflow */
+}
+
+.request-from {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.request-status {
+  font-size: 0.78rem;
+  color: #555;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Right side — buttons stay compact */
+.request-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;         /* ← never shrink or stretch */
+}
+
+.btn-primary {
+  padding: 8px 20px;
+  background: #00a884;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  width: auto;            /* ← don't stretch full width */
+  margin-top: 0;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+.btn-primary:hover { background: #008f6f; }
+
+.btn-danger {
+  padding: 8px 20px;
+  background: rgba(255, 59, 59, 0.15);
+  color: #ff6b6b;
+  border: 1px solid rgba(255, 59, 59, 0.4);
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  width: auto;            /* ← don't stretch full width */
+  margin-top: 0;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+.btn-danger:hover {
+  background: rgba(255, 59, 59, 0.3);
+  border-color: rgba(255, 59, 59, 0.7);
+}
+
+.status-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1.5px solid #111;  /* ← gives it a crisp edge */
+}
+.status-dot.online  { background: #00a884; }
+.status-dot.offline { background: #444; }
+
+/* also in chat header */
+.online-text  { color: #00a884; font-weight: 500; }
+.offline-text { color: #444; }
+
+/* ── Unread highlight ── */
+.friend-item.has-unread {
+  background: #0d1f14;
+  border-left-color: #00a884;
+}
+.friend-item.has-unread .friend-name {
+  color: #00a884;
+  font-weight: 700;
+}
+
+/* ── Unread badge ── */
+.unread-badge {
+  background: #00a884;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  flex-shrink: 0;
+  animation: pulse-badge 1.5s ease-in-out infinite;
+}
+@keyframes pulse-badge {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.2); }
+}
