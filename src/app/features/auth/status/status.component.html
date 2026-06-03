@@ -1,5 +1,5 @@
 <div class="status-page">
-  <!-- Header -->
+  <!-- ── Header ── -->
   <div class="status-header">
     <div style="display: flex; align-items: center; gap: 10px">
       <button class="back-btn-icon" (click)="goBack()">←</button>
@@ -10,7 +10,7 @@
     </button>
   </div>
 
-  <!-- Add Status Form -->
+  <!-- ── Add Status Form ── -->
   <div class="add-status-form" *ngIf="showAddStatus">
     <textarea
       [(ngModel)]="newText"
@@ -26,21 +26,79 @@
         hidden
       />
     </label>
-    <img
-      *ngIf="imagePreview"
-      [src]="imagePreview"
-      style="width: 100%; border-radius: 8px; margin-top: 8px"
-    />
+    <div class="image-preview-wrapper" *ngIf="imagePreview">
+      <img [src]="imagePreview" />
+    </div>
     <button class="post-btn" (click)="postStatus()" [disabled]="loading">
       {{ loading ? "Posting..." : "Post Status" }}
     </button>
   </div>
 
-  <!-- Friends Status List -->
+  <!-- ══════════════════════════════
+       MY STATUS — pinned at top
+  ══════════════════════════════ -->
+  <div class="status-section-label">My Status</div>
+
+  <div
+    *ngIf="myStatuses.length === 0"
+    class="status-item my-status-empty"
+    (click)="showAddStatus = true"
+  >
+    <div class="status-avatar-ring my-ring">
+      <div class="status-avatar-placeholder">
+        {{ currentUserName?.charAt(0)?.toUpperCase() }}
+      </div>
+    </div>
+    <div class="status-item-info">
+      <span class="status-user-name">My Status</span>
+      <span class="status-preview" style="color: #555">
+        Tap to add a status update
+      </span>
+    </div>
+  </div>
+
+  <div
+    *ngFor="let user of myStatuses"
+    class="status-item my-status-item"
+    (click)="viewStatus(user)"
+  >
+    <div class="status-avatar-ring my-ring">
+      <img
+        *ngIf="user.image"
+        [src]="api + '/' + user.image"
+        class="status-avatar-img"
+      />
+      <div *ngIf="!user.image" class="status-avatar-placeholder">
+        {{ user.name?.charAt(0).toUpperCase() }}
+      </div>
+    </div>
+    <div class="status-item-info">
+      <span class="status-user-name">My Status</span>
+      <span class="status-preview">
+        {{ user.statuses[0].content || "📷 Photo" }}
+      </span>
+      <span class="status-time">{{ user.statuses[0].created_at }}</span>
+    </div>
+    <span class="status-count" *ngIf="user.statuses.length > 1">
+      {{ user.statuses.length }}
+    </span>
+  </div>
+
+  <!-- ══════════════════════════════
+       DIVIDER
+  ══════════════════════════════ -->
+  <div class="status-section-label" *ngIf="friendStatuses.length > 0">
+    Recent Updates
+  </div>
+
+  <!-- ══════════════════════════════
+       FRIENDS STATUSES
+  ══════════════════════════════ -->
   <div class="status-list">
     <div *ngIf="friendStatuses.length === 0" class="empty-state">
       No status updates from friends yet.
     </div>
+
     <div
       class="status-item"
       *ngFor="let user of friendStatuses"
@@ -49,7 +107,7 @@
       <div class="status-avatar-ring">
         <img
           *ngIf="user.image"
-          [src]="user.image ? api + '/' + user.image : ''"
+          [src]="api + '/' + user.image"
           class="status-avatar-img"
         />
         <div *ngIf="!user.image" class="status-avatar-placeholder">
@@ -69,10 +127,9 @@
     </div>
   </div>
 
-  <!-- ✅ WhatsApp Style Status Viewer -->
+  <!-- ── Status Viewer ── -->
   <div class="wa-status-overlay" *ngIf="selectedUser" (click)="closeView()">
     <div class="wa-status-viewer" (click)="$event.stopPropagation()">
-      <!-- Progress bars -->
       <div class="wa-progress-bars">
         <div
           class="wa-progress-bar"
@@ -90,8 +147,6 @@
           ></div>
         </div>
       </div>
-
-      <!-- Header -->
       <div class="wa-status-header">
         <div class="wa-status-user">
           <div class="wa-avatar">
@@ -118,18 +173,12 @@
         </div>
         <button class="wa-close-btn" (click)="closeView()">✕</button>
       </div>
-
-      <!-- Status content -->
       <div class="wa-status-content">
-        <!-- Image status -->
         <img
           *ngIf="selectedUser.statuses[currentStatusIndex]?.image"
           [src]="api + '/' + selectedUser.statuses[currentStatusIndex].image"
-          crossorigin="anonymous"
           class="wa-status-image"
         />
-
-        <!-- Text status -->
         <div
           *ngIf="
             selectedUser.statuses[currentStatusIndex]?.content &&
@@ -139,8 +188,6 @@
         >
           {{ selectedUser.statuses[currentStatusIndex].content }}
         </div>
-
-        <!-- Text overlay on image -->
         <div
           *ngIf="
             selectedUser.statuses[currentStatusIndex]?.content &&
@@ -151,12 +198,8 @@
           {{ selectedUser.statuses[currentStatusIndex].content }}
         </div>
       </div>
-
-      <!-- Navigation areas -->
       <div class="wa-nav-left" (click)="prevStatus($event)"></div>
       <div class="wa-nav-right" (click)="nextStatus($event)"></div>
-
-      <!-- Delete button -->
       <div class="wa-status-footer">
         <button
           class="delete-btn"

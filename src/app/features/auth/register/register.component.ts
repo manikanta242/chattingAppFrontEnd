@@ -63,8 +63,12 @@ export class RegisterComponent {
       next: (res) => {
         this.success = 'Registered successfully! Please login.';
       },
-      error: () => {
-        this.error = 'Registration failed. Try again.';
+      error: (err) => {
+        console.log("eeeee", err);
+        
+        this.error = err.error.detail;
+        console.log(this.error);
+        
         this.loading = false;
       },
       complete: () => {

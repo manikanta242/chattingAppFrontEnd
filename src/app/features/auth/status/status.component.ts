@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 import { StatusService } from '../../../services/status.service';
 import { Location } from '@angular/common';
 import { environment } from '../../../../environments/environment';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-status',
@@ -24,14 +25,21 @@ export class StatusComponent implements OnInit, OnDestroy {
   currentStatusIndex = 0;
   progressWidth = 0;
   progressInterval: any;
+  currentUserName: string;
+  currentUserId: number;
+  myStatuses: any[] = [];
 
   private readonly STATUS_DURATION = 5000; // 5 seconds per status
-  private readonly TICK_INTERVAL = 50;     // update progress every 50ms
+  private readonly TICK_INTERVAL = 50; // update progress every 50ms
 
   constructor(
     private statusService: StatusService,
     private location: Location,
-  ) {}
+    private authService: AuthService,
+  ) {
+    this.currentUserName = this.authService.getUserName();
+    this.currentUserId = this.authService.getUserId();
+  }
 
   ngOnInit() {
     this.loadStatuses();
@@ -43,13 +51,21 @@ export class StatusComponent implements OnInit, OnDestroy {
 
   loadStatuses() {
     this.statusService.getFriendsStatus().subscribe({
-      next: (res) => (this.friendStatuses = res),
+      next: (res) => {
+        // split my status from friends
+        this.myStatuses = res.filter(
+          (u: any) => Number(u.user_id) === Number(this.currentUserId),
+        );
+        this.friendStatuses = res.filter(
+          (u: any) => Number(u.user_id) !== Number(this.currentUserId),
+        );
+      },
     });
   }
 
   viewStatus(user: any) {
     this.selectedUser = user;
-    this.currentStatusIndex = 0;   // ✅ always start from first status
+    this.currentStatusIndex = 0; // ✅ always start from first status
     this.progressWidth = 0;
     this.startProgress();
   }

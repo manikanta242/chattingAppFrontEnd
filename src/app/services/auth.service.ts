@@ -88,6 +88,12 @@ export class AuthService {
     return this.http.post(`${this.api}/auth/reset-password`, formData);
   }
 
+  resendVerification(email: string): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/auth/resend-verification`, {
+      email,
+    });
+  }
+
   logout(user_id: string): Observable<any> {
     return this.http.post(`${this.api}/auth/logout`, {
       id: user_id,
