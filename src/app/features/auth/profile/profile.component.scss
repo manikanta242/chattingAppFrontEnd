@@ -1,0 +1,187 @@
+/* ══════════════════════════════════════════
+   PROFILE MODAL COMPONENT
+══════════════════════════════════════════ */
+
+/* ── Overlay ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+/* ── Modal box ── */
+.modal-box {
+  background: var(--bg-surface-1);
+  border: 1px solid var(--border-dark-3);
+  border-radius: var(--radius-xl);
+  width: 100%;
+  max-width: 420px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: var(--space-5);
+  box-shadow: var(--shadow-modal);
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-thumb {
+    background: var(--bg-surface-6);
+    border-radius: 2px;
+  }
+}
+
+/* ── Header ── */
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  h3 {
+    font-size: var(--font-size-md);
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  button {
+    background: none;
+    border: none;
+    color: var(--text-faint);
+    font-size: 18px;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-full);
+    transition: color var(--transition-fast), background var(--transition-fast);
+
+    &:hover {
+      color: var(--text-primary);
+      background: var(--bg-surface-4);
+    }
+  }
+}
+
+/* ── Avatar section ── */
+.modal-avatar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.avatar-placeholder-lg {
+  width: 90px;
+  height: 90px;
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.change-photo-btn {
+  font-size: var(--font-size-sm);
+  color: var(--color-accent);
+  cursor: pointer;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  transition: background var(--transition-fast);
+
+  &:hover { background: var(--color-accent-alpha); }
+}
+
+/* ── Form ── */
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+
+  label {
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  input {
+    padding: 10px var(--space-3);
+    border: 1px solid var(--border-dark-3);
+    border-radius: var(--radius-md);
+    background: var(--bg-surface-4);
+    color: var(--text-primary);
+    font-size: var(--font-size-base);
+    outline: none;
+    transition: border-color var(--transition-base);
+
+    &:focus { border-color: var(--color-accent); }
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    &::placeholder { color: var(--text-faint); }
+  }
+}
+
+/* ── Save button ── */
+.save-btn {
+  width: 100%;
+  padding: 11px;
+  background: var(--color-accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-base);
+
+  &:hover:not(:disabled) { background: var(--color-accent-hover); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+/* ── Change password button ── */
+.change-pass-btn {
+  background: var(--bg-surface-3);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-dark-3);
+  border-radius: var(--radius-pill);
+  padding: 9px 24px;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: border-color var(--transition-base), color var(--transition-base);
+
+  &:hover:not(:disabled) {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+/* ── Feedback ── */
+.feedback-success {
+  color: var(--color-success);
+  font-size: var(--font-size-sm);
+  text-align: center;
+}
+.feedback-error {
+  color: var(--color-danger);
+  font-size: var(--font-size-sm);
+  text-align: center;
+}

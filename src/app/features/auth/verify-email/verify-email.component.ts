@@ -9,6 +9,7 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './verify-email.component.html',
+  styleUrl: './verify-email.component.scss',
 })
 export class VerifyEmailComponent implements OnInit {
   status: 'loading' | 'success' | 'error' = 'loading';

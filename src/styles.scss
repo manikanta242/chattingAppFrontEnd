@@ -1,3 +1,108 @@
+/* ══════════════════════════════════════════
+   DESIGN SYSTEM — CSS Custom Properties
+   All raw colour/spacing tokens live here.
+   Use var(--token) everywhere below.
+══════════════════════════════════════════ */
+:root {
+  /* ── Brand palette ── */
+  --color-primary:        #0084ff;
+  --color-primary-hover:  #006fd6;
+  --color-primary-alpha:  rgba(0, 132, 255, 0.1);
+
+  --color-accent:         #00a884;   /* WhatsApp-style green */
+  --color-accent-hover:   #008f6f;
+  --color-accent-alpha:   rgba(0, 168, 132, 0.15);
+  --color-accent-shadow:  rgba(0, 168, 132, 0.30);
+
+  --color-agent:          #7c3aed;   /* AI/agent purple */
+  --color-agent-hover:    #6d28d9;
+  --color-agent-alpha:    rgba(124, 58, 237, 0.15);
+
+  /* ── Semantic ── */
+  --color-danger:         #ff6b6b;
+  --color-danger-bg:      rgba(255, 59, 59, 0.12);
+  --color-danger-border:  rgba(255, 59, 59, 0.40);
+  --color-success:        #27ae60;
+  --color-warning:        #f39c12;
+
+  /* ── Dark surface scale ── */
+  --bg-base:              #0a0a0a;
+  --bg-surface-1:         #111111;
+  --bg-surface-2:         #161616;
+  --bg-surface-3:         #1a1a1a;
+  --bg-surface-4:         #1e1e1e;
+  --bg-surface-5:         #222222;
+  --bg-surface-6:         #2a2a2a;
+  --bg-surface-7:         #333333;
+
+  /* ── Light surface scale (auth pages) ── */
+  --bg-light-base:        #f0f2f5;
+  --bg-light-card:        #ffffff;
+  --bg-light-input:       #ffffff;
+  --border-light:         #dddddd;
+
+  /* ── Text ── */
+  --text-primary:         #ffffff;
+  --text-secondary:       #aaaaaa;
+  --text-muted:           #888888;
+  --text-faint:           #555555;
+  --text-dark:            #1c1e21;
+
+  /* ── Borders ── */
+  --border-dark-1:        #1a1a1a;
+  --border-dark-2:        #222222;
+  --border-dark-3:        #2a2a2a;
+  --border-dark-4:        #333333;
+
+  /* ── Spacing scale ── */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+
+  /* ── Radius scale ── */
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   14px;
+  --radius-xl:   20px;
+  --radius-pill: 9999px;
+  --radius-full: 50%;
+
+  /* ── Typography ── */
+  --font-family:      "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-size-xs:     0.72rem;
+  --font-size-sm:     0.80rem;
+  --font-size-base:   0.92rem;
+  --font-size-md:     1.00rem;
+  --font-size-lg:     1.10rem;
+  --font-size-xl:     1.25rem;
+  --font-size-2xl:    1.50rem;
+
+  /* ── Shadows ── */
+  --shadow-card:      0 4px 24px rgba(0, 0, 0, 0.40);
+  --shadow-modal:     0 8px 40px rgba(0, 0, 0, 0.60);
+  --shadow-auth:      0 4px 24px rgba(0, 132, 255, 0.10);
+  --shadow-accent:    0 4px 16px var(--color-accent-shadow);
+
+  /* ── Transitions ── */
+  --transition-fast:  0.15s ease;
+  --transition-base:  0.20s ease;
+  --transition-slow:  0.30s ease;
+
+  /* ── Layout ── */
+  --icon-bar-width:   60px;
+  --sidebar-width:    300px;
+  --chat-max-width:   700px;
+  --auth-card-width:  420px;
+  --modal-width:      460px;
+  --avatar-sm:        36px;
+  --avatar-md:        44px;
+  --avatar-lg:        72px;
+}
+
 /* ── Reset ── */
 * {
   box-sizing: border-box;
@@ -2776,6 +2881,7 @@ button:disabled {
   text-align: center;
   line-height: 1.4;
   word-break: break-word;
+  text-align: center;
 }
 
 /* text overlay when image + text both exist */
@@ -3564,4 +3670,16 @@ button:disabled {
   height: auto;
   display: block;
   object-fit: contain;
+}
+
+/* ── Shared sidebar layout ── */
+.with-sidebar-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.with-sidebar-layout > *:not(.icon-bar):not(app-sidebar) {
+  flex: 1;
+  overflow-y: auto;
 }

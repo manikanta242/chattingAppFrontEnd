@@ -8,7 +8,8 @@ import { AuthService } from '../../../services/auth.service';
   selector   : 'app-reset-password',
   standalone : true,
   imports    : [CommonModule, FormsModule, RouterModule],
-  templateUrl: './reset-password.component.html'
+  templateUrl: './reset-password.component.html',
+  styleUrl: './reset-password.component.scss'
 })
 export class ResetPasswordComponent implements OnInit {
   token           = '';

@@ -6,12 +6,14 @@ import { StatusService } from '../../../services/status.service';
 import { Location } from '@angular/common';
 import { environment } from '../../../../environments/environment';
 import { AuthService } from '../../../services/auth.service';
+import { SidebarComponent } from '../../../shared/sidebar/sidebar.component';
 
 @Component({
   selector: 'app-status',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, SidebarComponent],
   templateUrl: './status.component.html',
+  styleUrl: './status.component.scss',
 })
 export class StatusComponent implements OnInit, OnDestroy {
   friendStatuses: any[] = [];
@@ -25,7 +27,7 @@ export class StatusComponent implements OnInit, OnDestroy {
   currentStatusIndex = 0;
   progressWidth = 0;
   progressInterval: any;
-  currentUserName: string;
+  currentUserName: any;
   currentUserId: number;
   myStatuses: any[] = [];
 

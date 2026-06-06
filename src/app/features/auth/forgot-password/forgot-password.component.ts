@@ -8,7 +8,8 @@ import { AuthService } from '../../../services/auth.service';
   selector   : 'app-forgot-password',
   standalone : true,
   imports    : [CommonModule, FormsModule, RouterModule],
-  templateUrl: './forgot-password.component.html'
+  templateUrl: './forgot-password.component.html',
+  styleUrl: './forgot-password.component.scss'
 })
 export class ForgotPasswordComponent {
   email   = '';

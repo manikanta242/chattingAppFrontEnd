@@ -51,9 +51,16 @@ export interface WsErrorEvent {
   message: string;
 }
 
+export interface WsFriendRequestEvent {
+  type:           'friend_request';
+  from_user_id:   number;
+  from_user_name: string;
+}
+
 export type WsEvent =
   | WsMessageEvent
   | WsTypingEvent
   | WsReadEvent
   | WsPresenceEvent
-  | WsErrorEvent;
+  | WsErrorEvent
+  | WsFriendRequestEvent;

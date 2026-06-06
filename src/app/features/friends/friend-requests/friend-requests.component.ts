@@ -3,12 +3,14 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FriendService } from '../../../services/friend.service';
 import { AuthService } from '../../../services/auth.service';
+import { SidebarComponent } from '../../../shared/sidebar/sidebar.component';
 
 @Component({
   selector: 'app-friend-requests',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, SidebarComponent],
   templateUrl: './friend-requests.component.html',
+  styleUrl: './friend-requests.component.scss',
 })
 export class FriendRequestsComponent implements OnInit {
   pendingRequests: any[] = [];
@@ -71,7 +73,6 @@ export class FriendRequestsComponent implements OnInit {
           );
           this.friendService.setPendingCount(this.pendingRequests.length);
         },
-        error: (err) => console.error('Failed to decline request:', err),
       });
   }
 }

@@ -10,6 +10,7 @@
         🔔
         <span class="badge" *ngIf="pendingCount > 0">{{ pendingCount }}</span>
       </a>
+      <a routerLink="/agent" class="icon-bar-btn" title="AI Agent">🤖</a>
     </div>
     <div class="icon-bar-bottom">
       <div class="icon-bar-avatar" (click)="goToProfile()" title="Profile">
@@ -194,6 +195,18 @@
 
         <!-- Scroll anchor -->
         <div #messagesEnd></div>
+      </div>
+
+      <!-- ── Smart Reply Suggestions ── -->
+      <div class="suggestions-row" *ngIf="suggestions.length > 0 || loadingSuggestions">
+        <div class="suggestion-loading" *ngIf="loadingSuggestions">
+          <span></span><span></span><span></span>
+        </div>
+        <button
+          *ngFor="let s of suggestions"
+          class="suggestion-chip"
+          (click)="useSuggestion(s)"
+        >{{ s }}</button>
       </div>
 
       <!-- ── Message Input ── -->

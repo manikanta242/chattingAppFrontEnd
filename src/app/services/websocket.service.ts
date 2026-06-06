@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ReplaySubject, Observable } from 'rxjs';
+import { Subject, Observable } from 'rxjs';
 import { AuthService } from './auth.service';
 import { WsEvent } from '../../../models/message.model';
 import { environment } from '../../environments/environment';
@@ -7,7 +7,7 @@ import { environment } from '../../environments/environment';
 @Injectable({ providedIn: 'root' })
 export class WebSocketService {
   private socket!: WebSocket;
-  private messageSubject = new ReplaySubject<WsEvent>(1);
+  private messageSubject = new Subject<WsEvent>();
 
   // Any component can subscribe to this to receive real-time events
   messages$: Observable<WsEvent> = this.messageSubject.asObservable();

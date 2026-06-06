@@ -1,0 +1,41 @@
+/* ══════════════════════════════════════════
+   LOGIN COMPONENT
+   Uses global auth classes from styles.scss.
+   Component-scoped overrides only.
+══════════════════════════════════════════ */
+
+/* ── Input with icon prefix ── */
+.input-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  .input-prefix {
+    position: absolute;
+    left: 10px;
+    font-size: 14px;
+    pointer-events: none;
+    line-height: 1;
+  }
+
+  input {
+    padding-left: 32px !important;
+  }
+}
+
+/* ── Submit button loading state ── */
+button[type="submit"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+/* ── Error message ── */
+.error {
+  color: var(--color-danger);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-danger-bg);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--color-danger);
+}

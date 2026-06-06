@@ -10,6 +10,7 @@ import { WebSocketService } from '../../../services/websocket.service';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './login.component.html',
+  styleUrl: './login.component.scss',
 })
 export class LoginComponent {
   // Matches loginSchema: { email, password }

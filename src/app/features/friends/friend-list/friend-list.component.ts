@@ -4,12 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { FriendService } from '../../../services/friend.service';
 import { AuthService } from '../../../services/auth.service';
+import { SidebarComponent } from '../../../shared/sidebar/sidebar.component';
 
 @Component({
   selector: 'app-friend-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, SidebarComponent],
   templateUrl: './friend-list.component.html',
+  styleUrl: './friend-list.component.scss',
 })
 export class FriendListComponent implements OnInit {
   allUsers: any[] = []; // from GET /auth/user

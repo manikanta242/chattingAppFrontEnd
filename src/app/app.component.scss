@@ -1,0 +1,9 @@
+/* ── App Root Host ── */
+:host {
+  display: block;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+}

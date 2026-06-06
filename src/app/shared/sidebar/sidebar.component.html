@@ -1,0 +1,45 @@
+<div class="icon-bar">
+  <div class="icon-bar-top">
+    <a routerLink="/chat"            class="icon-bar-btn" [class.active]="activeRoute === 'chat'"     title="Chats">💬</a>
+    <a routerLink="/status"          class="icon-bar-btn" [class.active]="activeRoute === 'status'"   title="Status">🔵</a>
+    <a routerLink="/friends"         class="icon-bar-btn" [class.active]="activeRoute === 'friends'"  title="Friends">👥</a>
+    <a routerLink="/friends/requests" class="icon-bar-btn" [class.active]="activeRoute === 'requests'" title="Requests">
+      🔔
+      <span class="badge" *ngIf="pendingCount > 0">{{ pendingCount }}</span>
+    </a>
+    <a routerLink="/agent"           class="icon-bar-btn" [class.active]="activeRoute === 'agent'"   title="AI Agent">🤖</a>
+  </div>
+
+  <div class="icon-bar-bottom">
+    <div class="icon-bar-avatar" (click)="openProfile()" title="Profile">
+      <img *ngIf="currentUser?.image" [src]="api + '/' + currentUser.image" />
+      <div *ngIf="!currentUser?.image" class="avatar-placeholder">
+        {{ currentUser?.name?.charAt(0)?.toUpperCase() }}
+      </div>
+    </div>
+    <button (click)="logout()" class="icon-bar-btn" title="Logout">🚪</button>
+  </div>
+</div>
+
+<!-- Profile Modal -->
+<app-profile
+  *ngIf="showProfile"
+  [user]="currentUser"
+  (close)="closeProfile()"
+  (updated)="onProfileUpdated($event)"
+></app-profile>
+
+<!-- Logout Modal -->
+<div class="modal-overlay" *ngIf="showLogoutModal" (click)="cancelLogout()">
+  <div class="modal-box logout-modal" (click)="$event.stopPropagation()">
+    <div style="text-align:center">
+      <div style="font-size:48px">🚪</div>
+      <h3 style="margin:12px 0 8px">Logout</h3>
+      <p style="color:#aaa; font-size:0.9rem">Are you sure you want to logout?</p>
+    </div>
+    <div class="logout-actions">
+      <button class="btn-cancel"  (click)="cancelLogout()">Cancel</button>
+      <button class="btn-confirm" (click)="confirmLogout()">Logout</button>
+    </div>
+  </div>
+</div>

@@ -14,6 +14,7 @@ import { MessageService } from '../../services/message.service';
 import { FriendService } from '../../services/friend.service';
 import { AuthService } from '../../services/auth.service';
 import { WebSocketService } from '../../services/websocket.service';
+import { ChatService } from '../../services/chat.service';
 import { ProfileComponent } from '../auth/profile/profile.component';
 import { environment } from '../../../environments/environment';
 interface OnlineStatus {
@@ -28,6 +29,7 @@ interface TypingStatus {
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink, ProfileComponent],
   templateUrl: './chat.component.html',
+  styleUrl: './chat.component.scss',
 })
 export class ChatComponent implements OnInit, OnDestroy {
   @ViewChild('messagesEnd') messagesEnd!: ElementRef;
@@ -37,6 +39,8 @@ export class ChatComponent implements OnInit, OnDestroy {
   messages: Message[] = []; // current chat messages
   selectedFriend: any = null; // who you're chatting with
   newMessage = ''; // input box value
+  suggestions: string[] = [];
+  loadingSuggestions = false;
   currentUserId: number;
   currentUserName: string;
   pendingRequests: any[] = [];
@@ -57,6 +61,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     private messageService: MessageService,
     private friendService: FriendService,
     private authService: AuthService,
+    private chatService: ChatService,
   ) {
     this.currentUserId = this.authService.getUserId();
     this.currentUserName = this.authService.getUserName();
@@ -149,12 +154,8 @@ export class ChatComponent implements OnInit, OnDestroy {
         next: (res) => {
           this.messages = res.response || [];
           this.scrollToBottom();
-
-          // Send read receipt for the last message
-          // ✅ Only send read if socket is open
-          // if (this.wsService.isOpen()) {
           this.wsService.sendRead(friendUserId);
-          // }
+          this.fetchSuggestions();
         },
       });
   }
@@ -216,6 +217,10 @@ export class ChatComponent implements OnInit, OnDestroy {
                 created_at: event.created_at,
               });
               this.scrollToBottom();
+              // Refresh suggestions when friend sends a message
+              if (event.sender_id !== this.currentUserId) {
+                this.fetchSuggestions();
+              }
             }
           }
           break;
@@ -238,15 +243,40 @@ export class ChatComponent implements OnInit, OnDestroy {
     if (!context || !this.selectedFriend) return;
     const friendUserId = this.selectedFriend.friend_id;
 
-    // Send via WebSocket — matches your ws event format:
-    // { "type": "message", "receiver_id": 2, "context": "Hey!" }
     this.wsService.sendMessage(friendUserId, context);
-
     this.newMessage = '';
-
-    // Stop typing indicator
+    this.suggestions = []; // clear after sending
     this.wsService.sendTyping(friendUserId, false);
     clearTimeout(this.typingTimer);
+  }
+
+  /** Build suggestion payload from recent messages and call API */
+  fetchSuggestions(): void {
+    if (!this.messages.length) return;
+    this.loadingSuggestions = true;
+    this.suggestions = [];
+
+    // Map last 6 messages to role/content format
+    const recent = this.messages.slice(-6).map((m) => ({
+      role: m.sender_id === this.currentUserId ? 'user' : 'assistant',
+      content: m.context,
+    }));
+
+    this.chatService.getSuggestions(recent).subscribe({
+      next: (res) => {
+        this.suggestions = res.suggestions || [];
+        this.loadingSuggestions = false;
+      },
+      error: () => {
+        this.loadingSuggestions = false;
+      },
+    });
+  }
+
+  /** Fill input with suggestion text */
+  useSuggestion(text: string): void {
+    this.newMessage = text;
+    this.suggestions = [];
   }
 
   onTyping(): void {

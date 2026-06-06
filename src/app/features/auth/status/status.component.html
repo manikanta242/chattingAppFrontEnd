@@ -1,3 +1,6 @@
+<div class="with-sidebar-layout">
+  <app-sidebar activeRoute="status"></app-sidebar>
+
 <div class="status-page">
   <!-- ── Header ── -->
   <div class="status-header">
@@ -46,7 +49,7 @@
   >
     <div class="status-avatar-ring my-ring">
       <div class="status-avatar-placeholder">
-        {{ currentUserName?.charAt(0)?.toUpperCase() }}
+        {{ currentUserName?.charAt(0).toUpperCase() }}
       </div>
     </div>
     <div class="status-item-info">
@@ -200,7 +203,10 @@
       </div>
       <div class="wa-nav-left" (click)="prevStatus($event)"></div>
       <div class="wa-nav-right" (click)="nextStatus($event)"></div>
-      <div class="wa-status-footer">
+      <div
+        class="wa-status-footer"
+        *ngIf="selectedUser.user_id == currentUserId"
+      >
         <button
           class="delete-btn"
           (click)="deleteStatus(selectedUser.statuses[currentStatusIndex].id)"
@@ -210,4 +216,5 @@
       </div>
     </div>
   </div>
+</div>
 </div>
