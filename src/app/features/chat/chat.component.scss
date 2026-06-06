@@ -14,9 +14,12 @@
 
   /* Sidebar host element */
   app-sidebar {
-    display: flex;
+    display: block;
+    width: 64px;
+    min-width: 64px;
     flex-shrink: 0;
     height: 100vh;
+    position: relative;
   }
 }
 
@@ -477,22 +480,25 @@
 /* ══════════════════════════════════════════
    RESPONSIVE — mobile
 ══════════════════════════════════════════ */
-/* ── Tablet (641px – 900px): sidebar overlays, icon-bar stays left ── */
+/* ══════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════ */
+
+/* ── Tablet (641px – 900px) ──
+   Sidebar collapses in the flex flow (no fixed/transform).
+   Chat window expands to fill the freed space.
+─────────────────────────────────────────── */
 @media (max-width: 900px) and (min-width: 641px) {
   .sidebar {
-    position: fixed;
-    left: 64px;          /* sit right of the icon bar */
-    top: 0;
-    bottom: 0;
-    width: 280px;
-    z-index: 150;
-    transform: translateX(0);
-    transition: transform 0.25s ease;
-    box-shadow: 4px 0 24px rgba(0,0,0,0.6);
+    width: 260px;
+    flex-shrink: 0;
+    transition: width 0.25s ease, min-width 0.25s ease;
+    overflow: hidden;
 
     &.mobile-hidden {
-      transform: translateX(-110%);
-      pointer-events: none;
+      width: 0;
+      min-width: 0;
+      border-right: none;
     }
   }
 
@@ -506,20 +512,22 @@
   .message-bubble  { max-width: 80%; }
 }
 
-/* ── Mobile (≤640px): bottom tab bar, full-width panels ── */
+/* ── Mobile (≤640px) ──
+   Top navigation bar; content fills below.
+─────────────────────────────────────────── */
 @media (max-width: 640px) {
   .chat-layout {
     flex-direction: column;
     height: 100dvh;
-    padding-bottom: 60px;
+    padding-top: 56px;
   }
 
   .sidebar {
     position: fixed;
     left: 0;
-    top: 0;
-    bottom: 60px;
-    width: 85vw;
+    top: 56px;
+    bottom: 0;
+    width: 80vw;
     max-width: 300px;
     z-index: 150;
     transform: translateX(0);
@@ -527,17 +535,18 @@
     box-shadow: 4px 0 24px rgba(0,0,0,0.6);
 
     &.mobile-hidden {
-      transform: translateX(-110%);
+      transform: translateX(-100%);
       pointer-events: none;
+      visibility: hidden;
     }
   }
 
   .chat-window {
     position: fixed;
-    top: 0;
+    top: 56px;
     left: 0;
     right: 0;
-    bottom: 60px;
+    bottom: 0;
     z-index: 100;
     display: none;
 

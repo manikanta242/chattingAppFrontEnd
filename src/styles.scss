@@ -3682,9 +3682,12 @@ button:disabled {
 
   /* sidebar host */
   app-sidebar {
-    display: flex;
+    display: block;
+    width: 64px;
+    min-width: 64px;
     flex-shrink: 0;
     height: 100vh;
+    position: relative;
   }
 
   /* content area fills remaining space */
@@ -3699,17 +3702,24 @@ button:disabled {
   @media (max-width: 640px) {
     flex-direction: column;
     height: 100dvh;
-    padding-bottom: 60px;
+    padding-top: 56px;
 
     app-sidebar {
-      height: auto;
+      height: 56px;
       width: 100%;
-      order: 2;
+      order: 1;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 300;
     }
 
     > *:not(app-sidebar) {
-      height: calc(100dvh - 60px);
-      order: 1;
+      flex: 1;
+      height: calc(100dvh - 56px);
+      order: 2;
+      overflow-y: auto;
     }
   }
 }

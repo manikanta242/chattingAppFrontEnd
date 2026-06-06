@@ -1,8 +1,12 @@
 /* ── Host element ── */
 :host {
-  display: flex;
+  display: block;
+  width: 64px;
+  min-width: 64px;
   flex-shrink: 0;
   height: 100vh;
+  position: relative;
+  z-index: 10;
 }
 
 
@@ -21,10 +25,8 @@
   align-items: center;
   padding: 12px 0;
   height: 100vh;
-  position: sticky;
-  top: 0;
-  z-index: 100;
   flex-shrink: 0;
+  overflow: hidden;
 }
 
 .icon-bar-top {
@@ -198,30 +200,31 @@
   &:hover { background: rgba(239, 68, 68, 0.25); }
 }
 
-/* ── Mobile: bottom tab bar ── */
+/* ── Mobile: top navigation bar ── */
 @media (max-width: 640px) {
 
   :host {
     position: fixed;
-    bottom: 0;
+    top: 0;
     left: 0;
     right: 0;
-    height: 60px;
+    bottom: unset;
+    height: 56px;
     z-index: 300;
   }
 
   .icon-bar {
     width: 100%;
-    height: 60px;
+    height: 56px;
     min-width: unset;
     flex-direction: row;
     align-items: center;
     position: relative;
-    top: unset;
     border-right: none;
-    border-top: 1px solid #2a2a2a;
+    border-top: none;
+    border-bottom: 1px solid #2a2a2a;
     background: #0f0f0f;
-    padding: 0 4px;
+    padding: 0 8px;
     gap: 0;
   }
 
@@ -239,7 +242,7 @@
     flex-direction: row;
     align-items: center;
     padding-bottom: 0;
-    gap: 2px;
+    gap: 4px;
     height: 100%;
   }
 
@@ -256,14 +259,14 @@
       background: rgba(124, 58, 237, 0.18);
 
       &::before {
-        /* top indicator bar instead of left side bar */
+        /* bottom indicator when nav is on top */
         left: 20%;
         right: 20%;
-        top: 0;
-        bottom: unset;
+        top: unset;
+        bottom: 0;
         width: unset;
         height: 3px;
-        border-radius: 0 0 3px 3px;
+        border-radius: 3px 3px 0 0;
       }
     }
   }
