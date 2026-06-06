@@ -9,13 +9,13 @@ export class ChatService {
 
   constructor(private http: HttpClient) {}
 
-  /** Get 3 smart reply suggestions for the current conversation */
-  getSuggestions(messages: { role: string; content: string }[]): Observable<{ suggestions: string[] }> {
+  /** Autocorrect spelling/grammar in the typed text */
+  autocorrect(text: string): Observable<{ corrected: string; changed: boolean }> {
     const token = localStorage.getItem('token') ?? '';
     const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
-    return this.http.post<{ suggestions: string[] }>(
-      `${this.api}/agent/suggestions`,
-      { messages },
+    return this.http.post<{ corrected: string; changed: boolean }>(
+      `${this.api}/agent/autocorrect`,
+      { text },
       { headers },
     );
   }

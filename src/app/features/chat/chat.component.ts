@@ -38,9 +38,9 @@ export class ChatComponent implements OnInit, OnDestroy {
   friends: any[] = []; // accepted friends list
   messages: Message[] = []; // current chat messages
   selectedFriend: any = null; // who you're chatting with
-  newMessage = ''; // input box value
-  suggestions: string[] = [];
-  loadingSuggestions = false;
+  newMessage = '';
+  autocorrectSuggestion = '';
+  private autocorrectTimer: any;
   currentUserId: number;
   currentUserName: string;
   pendingRequests: any[] = [];
@@ -155,7 +155,6 @@ export class ChatComponent implements OnInit, OnDestroy {
           this.messages = res.response || [];
           this.scrollToBottom();
           this.wsService.sendRead(friendUserId);
-          this.fetchSuggestions();
         },
       });
   }
@@ -217,10 +216,6 @@ export class ChatComponent implements OnInit, OnDestroy {
                 created_at: event.created_at,
               });
               this.scrollToBottom();
-              // Refresh suggestions when friend sends a message
-              if (event.sender_id !== this.currentUserId) {
-                this.fetchSuggestions();
-              }
             }
           }
           break;
@@ -245,38 +240,9 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     this.wsService.sendMessage(friendUserId, context);
     this.newMessage = '';
-    this.suggestions = []; // clear after sending
+    this.autocorrectSuggestion = '';
     this.wsService.sendTyping(friendUserId, false);
     clearTimeout(this.typingTimer);
-  }
-
-  /** Build suggestion payload from recent messages and call API */
-  fetchSuggestions(): void {
-    if (!this.messages.length) return;
-    this.loadingSuggestions = true;
-    this.suggestions = [];
-
-    // Map last 6 messages to role/content format
-    const recent = this.messages.slice(-6).map((m) => ({
-      role: m.sender_id === this.currentUserId ? 'user' : 'assistant',
-      content: m.context,
-    }));
-
-    this.chatService.getSuggestions(recent).subscribe({
-      next: (res) => {
-        this.suggestions = res.suggestions || [];
-        this.loadingSuggestions = false;
-      },
-      error: () => {
-        this.loadingSuggestions = false;
-      },
-    });
-  }
-
-  /** Fill input with suggestion text */
-  useSuggestion(text: string): void {
-    this.newMessage = text;
-    this.suggestions = [];
   }
 
   onTyping(): void {
@@ -284,12 +250,42 @@ export class ChatComponent implements OnInit, OnDestroy {
     const friendUserId = Number(this.selectedFriend.friend_id);
 
     this.wsService.sendTyping(friendUserId, true);
+    this.autocorrectSuggestion = ''; // clear previous suggestion while typing
 
-    // Auto-stop after 2s of no input
+    // Auto-stop typing indicator after 2s
     clearTimeout(this.typingTimer);
     this.typingTimer = setTimeout(() => {
       this.wsService.sendTyping(friendUserId, false);
     }, 2000);
+
+    // Autocorrect after 1.2s pause — only if ≥4 chars
+    clearTimeout(this.autocorrectTimer);
+    if (this.newMessage.trim().length >= 4) {
+      this.autocorrectTimer = setTimeout(() => {
+        this.runAutocorrect();
+      }, 1200);
+    }
+  }
+
+  runAutocorrect(): void {
+    const text = this.newMessage.trim();
+    if (!text) return;
+    this.chatService.autocorrect(text).subscribe({
+      next: (res) => {
+        if (res.changed && res.corrected) {
+          this.autocorrectSuggestion = res.corrected;
+        }
+      },
+    });
+  }
+
+  applyAutocorrect(): void {
+    this.newMessage = this.autocorrectSuggestion;
+    this.autocorrectSuggestion = '';
+  }
+
+  dismissAutocorrect(): void {
+    this.autocorrectSuggestion = '';
   }
 
   isFriendTyping(friendId: number): boolean {

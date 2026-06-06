@@ -197,16 +197,12 @@
         <div #messagesEnd></div>
       </div>
 
-      <!-- ── Smart Reply Suggestions ── -->
-      <div class="suggestions-row" *ngIf="suggestions.length > 0 || loadingSuggestions">
-        <div class="suggestion-loading" *ngIf="loadingSuggestions">
-          <span></span><span></span><span></span>
-        </div>
-        <button
-          *ngFor="let s of suggestions"
-          class="suggestion-chip"
-          (click)="useSuggestion(s)"
-        >{{ s }}</button>
+      <!-- ── Autocorrect Banner ── -->
+      <div class="autocorrect-banner" *ngIf="autocorrectSuggestion">
+        <span class="autocorrect-label">✏️ Did you mean?</span>
+        <span class="autocorrect-text">{{ autocorrectSuggestion }}</span>
+        <button class="autocorrect-apply" (click)="applyAutocorrect()">Apply</button>
+        <button class="autocorrect-dismiss" (click)="dismissAutocorrect()">✕</button>
       </div>
 
       <!-- ── Message Input ── -->
