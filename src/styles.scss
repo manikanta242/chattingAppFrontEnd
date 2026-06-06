@@ -9,10 +9,10 @@
   --color-primary-hover:  #006fd6;
   --color-primary-alpha:  rgba(0, 132, 255, 0.1);
 
-  --color-accent:         #00a884;   /* WhatsApp-style green */
-  --color-accent-hover:   #008f6f;
-  --color-accent-alpha:   rgba(0, 168, 132, 0.15);
-  --color-accent-shadow:  rgba(0, 168, 132, 0.30);
+  --color-accent:         #7c3aed;   /* Purple accent */
+  --color-accent-hover:   #6d28d9;
+  --color-accent-alpha:   rgba(124, 58, 237, 0.15);
+  --color-accent-shadow:  rgba(124, 58, 237, 0.30);
 
   --color-agent:          #7c3aed;   /* AI/agent purple */
   --color-agent-hover:    #6d28d9;
@@ -3676,10 +3676,54 @@ button:disabled {
 .with-sidebar-layout {
   display: flex;
   height: 100vh;
+  width: 100%;
   overflow: hidden;
+  background: #0a0a0a;
+
+  /* sidebar host */
+  app-sidebar {
+    display: flex;
+    flex-shrink: 0;
+    height: 100vh;
+  }
+
+  /* content area fills remaining space */
+  > *:not(app-sidebar) {
+    flex: 1;
+    min-width: 0;
+    overflow-y: auto;
+    height: 100vh;
+  }
+
+  /* Mobile: bottom tab bar layout */
+  @media (max-width: 640px) {
+    flex-direction: column;
+    height: 100dvh;
+    padding-bottom: 60px;
+
+    app-sidebar {
+      height: auto;
+      width: 100%;
+      order: 2;
+    }
+
+    > *:not(app-sidebar) {
+      height: calc(100dvh - 60px);
+      order: 1;
+    }
+  }
 }
 
-.with-sidebar-layout > *:not(.icon-bar):not(app-sidebar) {
-  flex: 1;
-  overflow-y: auto;
+/* Mobile: add bottom padding so content clears the tab bar */
+@media (max-width: 640px) {
+  .with-sidebar-layout {
+    flex-direction: column;
+    height: 100dvh;
+  }
+  .with-sidebar-layout > *:not(app-sidebar) {
+    flex: 1;
+    height: auto;
+    padding-bottom: 60px; /* height of mobile tab bar */
+    overflow-y: auto;
+  }
 }
